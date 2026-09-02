@@ -1,0 +1,100 @@
+---
+/* The "models" view for one model: a verdict against the field, its standing
+   per language against the best other model, speed on the AMD Ryzen 4750U,
+   and the card facts. Rendered here for the default state (every language);
+   src/scripts/modelpage.ts draws the charts and re-renders what depends on
+   the language focus (?langs=de,fr). */
+import Layout from '../../layouts/Layout.astro';
+import FeatureBadges from '../../components/FeatureBadges.astro';
+import ModelSelect from '../../components/ModelSelect.astro';
+import LanguageFilter from '../../components/LanguageFilter.astro';
+import { loadDerived } from '../../lib/db';
+import { pageTitle, MODEL_RIGS } from '../../lib/config';
+import { fmtX, fmtGB } from '../../lib/format';
+import { jsonForScript } from '../../lib/json';
+import { standingRows, verdict, speedTable, compareSuggestions } from '../../lib/standing';
+
+export function getStaticPaths() {
+  return loadDerived().modelNames.map(m => ({ params: { model: m } }));
+}
+
+const model = Astro.params.model!;
+const d = loadDerived();
+const m = d.model(model);
+const quant = d.quant;
+
+const rows = standingRows(d, model);
+const speeds = speedTable(d);
+const mine = speeds[model] ?? {};
+const v = verdict(rows, mine);
+const rig0 = MODEL_RIGS[0];
+const frontier0 = rows.filter(r => r.frontier[rig0.id]).length;
+const suggestions = compareSuggestions(d, model);
+const compareHref = (other: string) => `/models?set=${encodeURIComponent(model)},${encodeURIComponent(other)}`;
+
+const payload = { model, rows, speeds, rigs: MODEL_RIGS };
+---
+<Layout view="models" title={pageTitle(model)}
+  description={`${model} on the Handy speech-to-text benchmarks: accuracy per language against the best other model, speed on Handy's target hardware, size, license and capabilities.`}>
+  <h2 class="view-title">model detail</h2>
+  <p class="view-sub">Where this model stands against the best model in each language at {quant}, its speed on an AMD Ryzen 4750U laptop, and what the card says. Add a second model to compare them head to head.</p>
+
+  <ModelSelect d={d} set={[model]} />
+  <div class="filter-row">
+    <LanguageFilter d={d} set={[]} />
+  </div>
+
+  <div class="pick-card">
+    <div class="pick-head">
+      <span class="pick-label">model</span>
+      <span class="pick-model">{model}</span>
+    </div>
+    {MODEL_RIGS.map(r => (
+      <div class="pick-stat"><span class="k">{r.short}</span><span class="v">{fmtX(mine[r.id])}</span></div>
+    ))}
+    <div class="pick-stat"><span class="k">{quant} size</span><span class="v">{fmtGB(d.sizeOf(model))}</span></div>
+    <div class="pick-stat" id="frontier-stat" tabindex="0"
+      data-tip={jsonForScript({ t: 'accuracy-vs-speed frontier', r: [['languages where no other model is both faster and more accurate on this rig', '']] })}>
+      <span class="k">frontier · {rig0.short}</span><span class="v">{frontier0} of {rows.length}</span>
+    </div>
+    <p class="pick-verdict" id="verdict"><strong>verdict: </strong>{[v.standing, v.weak, v.speed].filter(Boolean).join(' ')}</p>
+    <p class="pick-meta">
+      <strong>license: </strong>{m.license || 'unknown (no card data)'} · <strong>card languages: </strong>{m.n_card_languages ?? '?'} · <FeatureBadges m={m} />
+      {m.license == null && m.quants.length === 0 && <span class="hint"> · benchmark cells only, no model-card metadata in the database yet</span>}
+    </p>
+  </div>
+
+  <div class="card chart-card">
+    <p class="chart-title" id="standing-title">standing by language · {rows.length} benchmarked</p>
+    <p class="chart-sub">Each bar compares this model with the best other model in that language, on a log scale: left of center it is ahead, right of center behind, and the other model is named on the row. The two error rates use the legend colors: this model first, the other model second. Faded bars are ties, where the 95% confidence intervals overlap. Sorted strongest standing first. Hover a row for full details.</p>
+    <div class="legend">
+      <span class="key"><span class="dot" style="background:var(--series-1)"></span>{model} error</span>
+      <span class="key"><span class="dot" style="background:var(--series-2)"></span>best other model error</span>
+      <span class="key"><span class="dot" style="background:var(--de-emph)"></span>tie: the 95% CIs overlap</span>
+    </div>
+    <div id="standing-chart"></div>
+  </div>
+
+  <div class="card chart-card">
+    <p class="chart-title">speed · all {d.modelNames.length} models on the <span id="strip-rig">{rig0.short}</span></p>
+    <p class="chart-sub">× realtime, log scale. Left of the realtime marker, transcribing takes longer than the recording. Hover a dot for the model.</p>
+    <div id="speed-strip"></div>
+  </div>
+
+  {suggestions.length > 0 && (
+    <div class="card">
+      <h3>compare with</h3>
+      <div class="compare-list">
+        {suggestions.map(sg => (
+          <span><a class="chip" href={compareHref(sg.model)}>{sg.model}</a><span class="why">{sg.why}</span></span>
+        ))}
+      </div>
+    </div>
+  )}
+
+  <script is:inline type="application/json" id="modelpage-data" set:html={jsonForScript(payload)}></script>
+  <script>
+    import { initModelPage } from '../../scripts/modelpage';
+    initModelPage();
+  </script>
+</Layout>

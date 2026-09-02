@@ -1,0 +1,87 @@
+---
+import '../styles/global.css';
+import HandyHand from '../components/HandyHand.astro';
+import { loadDerived } from '../lib/db';
+import { SITE_NAME, WORDMARK, SITE_URL, HANDY_URL, ENGINE_URL, SITE_TITLE, SITE_DESCRIPTION, DEFAULT_LANG, DEFAULT_MODEL } from '../lib/config';
+
+type View = 'languages' | 'models' | 'matrix';
+
+interface Props {
+  title?: string;
+  /** meta description and og:description; one or two plain sentences */
+  description?: string;
+  view: View | null;
+}
+
+const { title = SITE_TITLE, description = SITE_DESCRIPTION, view } = Astro.props;
+/* Canonical is the path alone: the set views keep their state in the query
+   string, and those are variants of the bare page, not pages of their own. */
+const canonical = new URL(Astro.url.pathname, SITE_URL).href;
+/* The 404 page (view null) has no address of its own: no canonical, and
+   keep it out of search indexes. */
+const indexable = view !== null;
+const d = loadDerived();
+const meta = d.D.meta;
+
+const tabs: { view: View; href: string; label: string }[] = [
+  { view: 'languages', href: `/languages/${DEFAULT_LANG}`, label: 'languages' },
+  { view: 'models',    href: `/models/${DEFAULT_MODEL}`,    label: 'models' },
+  { view: 'matrix',    href: '/matrix',                     label: 'matrix' },
+];
+---
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" type="image/png" href="/favicon.png" />
+<title>{title}</title>
+<meta name="description" content={description} />
+{indexable ? <link rel="canonical" href={canonical} /> : <meta name="robots" content="noindex" />}
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={SITE_NAME} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+{indexable && <meta property="og:url" content={canonical} />}
+<meta name="twitter:card" content="summary" />
+<slot name="head" />
+</head>
+<body>
+<header class="site-header">
+  <div class="wordmark">
+    <HandyHand class="handy-hand" />
+    <div class="wordmark-text">
+      <span class="wordmark-name">{WORDMARK}</span>
+      <svg class="squiggle" viewBox="0 0 120 10" aria-hidden="true" preserveAspectRatio="none">
+        <path d="M2 6 C 12 1, 22 9, 32 5 S 52 2, 62 6 S 82 9, 92 4 S 112 3, 118 6"
+              fill="none" stroke="var(--pink)" stroke-width="3" stroke-linecap="round"></path>
+      </svg>
+    </div>
+  </div>
+  <p class="tagline">speech-to-text benchmarks for <a href={ENGINE_URL}>transcribe.cpp</a>, the engine behind <a href={HANDY_URL}>Handy</a></p>
+  <nav class="tabs" aria-label="Views">
+    {tabs.map(t => (
+      <a href={t.href} data-view={t.view} aria-current={t.view === view ? 'page' : undefined}>{t.label}</a>
+    ))}
+  </nav>
+</header>
+
+<main id="main"><slot /></main>
+
+<footer class="site-footer" id="footer">
+  <p>{d.modelNames.length} models · {d.testedLangs.length} benchmarked languages ({d.claimedOnlyLangs.length} more on cards) · dataset: {meta.dataset || '?'} · accuracy at {meta.wer_quant || '?'} on {meta.wer_gpu || '?'} · generated {meta.generated || '?'}</p>
+  <p>rebuild: <code>{meta.rebuild || ''} &amp;&amp; bun run build</code></p>
+</footer>
+
+<div id="tooltip" class="tooltip" role="status" hidden></div>
+
+<script>
+  import { initTooltips } from '../scripts/tooltip';
+  import { initSortable } from '../scripts/sortable';
+  import { initNav } from '../scripts/nav';
+  initTooltips();
+  initSortable();
+  initNav();
+</script>
+</body>
+</html>

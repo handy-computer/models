@@ -1,0 +1,28 @@
+---
+/* The set view: two or more languages, /languages?set=de,fr,ja. The server
+   renders the shell, the picker, and the whole dataset; src/scripts/langset.ts
+   owns #langset-results. A bare /languages, or a set of one, forwards to the
+   static single-language page. */
+import Layout from '../../layouts/Layout.astro';
+import LanguageSelect from '../../components/LanguageSelect.astro';
+import { loadDerived } from '../../lib/db';
+import { pageTitle } from '../../lib/config';
+import { jsonForScript } from '../../lib/json';
+
+const d = loadDerived();
+---
+<Layout view="languages" title={pageTitle('compare languages')}
+  description="Best speech-to-text model across a set of languages: the models covering every language in the set, ranked by their combined error rate, with a top pick.">
+  <h2 class="view-title">best model across languages</h2>
+  <p class="view-sub">Models covering every language in the set, ranked by the geometric mean of their error at {d.quant} — lower is better. Speed is × realtime on Handy target hardware.</p>
+
+  <LanguageSelect d={d} set={[]} island />
+
+  <div id="langset-results"><p class="hint">Loading…</p></div>
+
+  <script is:inline type="application/json" id="langset-data" set:html={jsonForScript(d.D)}></script>
+  <script>
+    import { initLangSet } from '../../scripts/langset';
+    initLangSet();
+  </script>
+</Layout>

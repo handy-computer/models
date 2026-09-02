@@ -1,0 +1,678 @@
+/* models.handy.computer · Handy theme
+   Chrome wears the Handy brand (cream / plum / pink); data marks use the
+   validated viz palette below (wine + blue on cream, CVD-checked). */
+
+:root {
+  color-scheme: light;
+  /* Handy brand */
+  --cream: #fffce5;
+  --ink: #382731;
+  --ink-2: #6b5560;
+  --muted: #9a8791;
+  --pink: #faa2ca;
+  --pink-light: #f9c5e8;
+  --wine-deep: #61052f;
+  /* chart chrome */
+  --surface: #fffef7;          /* card / chart surface */
+  --grid: #ede7cf;             /* hairline gridline, one step off surface */
+  --baseline: #d8cfc0;
+  --border-ring: rgba(56, 39, 49, 0.55);
+  /* validated data palette (light, on cream) */
+  --series-1: #c04a75;         /* wine — primary data hue */
+  --series-2: #3a6bc4;         /* blue — secondary (CPU vs GPU etc.) */
+  --series-3: #d98a2b;         /* amber   — categorical 3..5 for the model set view */
+  --series-4: #2f9c8a;         /* teal */
+  --series-5: #7d5bc4;         /* violet */
+  --de-emph: #c9bcb2;          /* grayed series */
+  /* sequential ramp (wine, light→dark) lives in JS: RAMP */
+  --font-display: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+
+/* the hidden attribute must win over any display rule (flex options, legend keys) */
+[hidden] { display: none !important; }
+
+.mono { font-family: var(--font-mono); }
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.55;
+  letter-spacing: 0.01rem;
+}
+
+a { color: var(--wine-deep); text-decoration-color: var(--pink); text-underline-offset: 2px; }
+a:hover { color: var(--ink); }
+
+/* ---------- header ---------- */
+
+.site-header {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 28px 24px 0;
+}
+
+/* The hand centres on the wordmark as a unit: the text on a tight line box
+   plus the squiggle under it. */
+.wordmark { display: inline-flex; align-items: center; gap: 0.75em; }
+/* the line box carries more space above the ascenders than below; lift the
+   unit by that so the visible text + squiggle centre on the hand */
+.wordmark-text { display: inline-block; line-height: 1.1; position: relative; top: -2px; }
+.handy-hand { height: 3.6rem; width: auto; display: block; flex: none; }
+
+.wordmark-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 2.4rem;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+}
+
+.squiggle {
+  display: block;
+  width: 100%;
+  height: 10px;
+  margin-top: -1px;
+}
+
+.tagline { margin: 6px 0 18px; color: var(--ink-2); font-size: 0.95rem; }
+/* header links follow handy.computer: bold, no underline, pink on hover */
+.tagline a { color: var(--ink); font-weight: 700; text-decoration: none; }
+.tagline a:hover { color: var(--pink); }
+
+.tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--ink); flex-wrap: wrap; }
+
+.tabs a {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--ink-2);
+  text-decoration: none;
+  padding: 7px 16px 5px;
+  border: 2px solid transparent;
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
+  position: relative;
+  top: 2px;
+}
+
+.tabs a:hover { color: var(--ink); background: var(--pink-light); border-color: var(--ink); }
+
+.tabs a[aria-current="page"] {
+  color: var(--ink);
+  background: var(--pink);
+  border-color: var(--ink);
+}
+
+/* ---------- layout ---------- */
+
+main {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 22px 24px 48px;
+}
+
+.view-title { font-family: var(--font-display); font-weight: 800; font-size: 1.5rem; margin: 4px 0 4px; }
+.view-sub { color: var(--ink-2); margin: 0 0 16px; max-width: 72ch; }
+
+/* one filter row above the content it scopes */
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 0 0 18px;
+}
+
+.filter-row label { font-weight: 600; font-size: 0.9rem; color: var(--ink-2); }
+
+select, .btn {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1.5px solid var(--ink);
+  border-radius: 9px;
+  padding: 6px 10px;
+}
+
+select:focus-visible, .btn:focus-visible, .chip:focus-visible, .tabs a:focus-visible,
+th button:focus-visible {
+  outline: 2.5px solid var(--series-2);
+  outline-offset: 2px;
+}
+
+/* ---------- searchable combobox (combobox.ts) ----------
+   Replaces <select data-nav> (single) and <select data-langset> (multi, with
+   tokens) on load. Reads as a search field, not a menu: magnifier on the
+   left, placeholder in search mode, brand focus halo instead of the browser
+   ring, key hints in the popup footer. */
+
+:root { --combo-w: 300px; --combo-multi-w: 640px; }
+
+/* the un-enhanced selects take the same footprint so hydration doesn't shift the page */
+select[data-nav] { width: var(--combo-w); }
+select[data-set] { width: min(100%, var(--combo-multi-w)); height: 37px; }
+/* the language focus on the model views is a secondary control: narrower */
+select.lang-filter, .combo.lang-filter { width: min(100%, 460px); }
+
+.combo { position: relative; display: inline-block; width: var(--combo-w); vertical-align: middle; }
+.combo.is-multi { width: min(100%, var(--combo-multi-w)); }
+/* model names are long: the models picker gets more room */
+select.wide[data-set], .combo.wide { width: min(100%, 900px); }
+
+.combo-field {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px 6px;
+  min-height: 37px;
+  padding: 3px 30px 3px 32px;
+  background: var(--surface);
+  border: 1.5px solid var(--ink);
+  border-radius: 9px;
+  cursor: text;
+}
+
+.combo-field:focus-within { border-color: var(--wine-deep); box-shadow: 0 0 0 3px var(--pink-light); }
+
+.combo-input {
+  flex: 1 1 10ch;
+  min-width: 10ch;
+  padding: 3px 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--ink);
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.combo-input::placeholder { color: var(--muted); opacity: 1; }
+
+.combo-icon, .combo-toggle {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  color: var(--muted);
+}
+
+.combo-icon { left: 11px; pointer-events: none; }
+.combo-field:focus-within .combo-icon { color: var(--wine-deep); }
+
+.combo-toggle {
+  right: 4px;
+  padding: 8px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.combo-toggle:hover { color: var(--ink); }
+.combo-toggle svg { transition: transform 120ms ease; }
+.combo[data-open="true"] .combo-toggle svg { transform: rotate(180deg); }
+
+/* the chosen languages, as tokens in the field */
+.combo-token {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.86rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--wine-deep);
+  background: var(--pink-light);
+  border: 1px solid var(--wine-deep);
+  border-radius: 6px;
+  padding: 0 1px 0 8px;
+  white-space: nowrap;
+}
+
+.combo-token-x {
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 1.05rem;
+  line-height: 1;
+  padding: 1px 5px 2px;
+  margin-left: 1px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.combo-token-x:hover { background: var(--pink); }
+
+.combo-pop {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 30;
+  min-width: min(100%, 300px);
+  background: var(--surface);
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: 3px 3px 0 var(--pink);
+  overflow: hidden;
+}
+
+.combo-list { max-height: 320px; overflow-y: auto; padding: 4px; }
+
+.combo-group {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  padding: 8px 10px 3px;
+}
+
+.combo-opt {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.combo-opt.is-active { background: var(--pink-light); }
+.combo-opt.is-chosen { font-weight: 600; }
+.is-multi .combo-opt.is-chosen::after { content: "✓"; color: var(--wine-deep); }
+.combo-empty { padding: 6px 10px; color: var(--muted); }
+
+.combo-hint {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-top: 1px solid var(--grid);
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.combo-hint kbd {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  padding: 0 5px;
+  border: 1px solid var(--baseline);
+  border-radius: 4px;
+  background: var(--cream);
+}
+
+.btn { cursor: pointer; font-weight: 600; }
+.btn:hover { background: var(--pink-light); }
+.btn[aria-pressed="true"] { background: var(--pink); }
+
+.hint { color: var(--muted); font-size: 0.85rem; }
+
+/* ---------- cards ---------- */
+
+.card {
+  background: var(--surface);
+  border: 2px solid var(--ink);
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin: 0 0 20px;
+}
+
+.card h3 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.05rem;
+  margin: 0 0 10px;
+}
+
+.card .card-note { color: var(--muted); font-size: 0.83rem; margin: 10px 0 0; }
+.card h3.model-title { font-family: var(--font-mono); font-size: 1.1rem; }
+
+/* the top-pick sticker */
+.pick-card {
+  display: flex;
+  align-items: baseline;
+  gap: 18px 28px;
+  flex-wrap: wrap;
+  background: var(--surface);
+  border: 2.5px solid var(--ink);
+  border-radius: 16px;
+  padding: 18px 22px;
+  margin-bottom: 20px;
+  box-shadow: 4px 4px 0 var(--pink);
+}
+
+/* two rows: a small caption line, then a big value line. Captions and
+   values are blocks with the same fixed line-height so the flex baseline
+   alignment lines up both rows across the head and every stat. */
+.pick-label, .pick-stat .k { display: block; line-height: 18px; }
+.pick-model, .pick-stat .v { display: block; line-height: 34px; }
+
+.pick-label {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--wine-deep);
+}
+
+.pick-model {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1.55rem;
+  color: var(--ink);
+  width: fit-content;
+}
+
+.pick-stat { min-width: 108px; }
+.pick-stat .v { font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; }
+.pick-stat .k { color: var(--ink-2); font-size: 0.8rem; }
+
+.pick-verdict { font-size: 0.9rem; color: var(--ink-2); flex-basis: 100%; margin-top: 2px; }
+.pick-verdict strong { color: var(--ink); }
+
+/* stat tiles (model view) */
+.tile-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
+
+.tile {
+  background: var(--surface);
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  padding: 12px 16px;
+  flex: 1 1 132px;
+}
+
+.tile .k { font-size: 0.8rem; color: var(--ink-2); display: block; }
+.tile .v { font-family: var(--font-display); font-weight: 800; font-size: 1.45rem; }
+.tile .u { font-size: 0.85rem; color: var(--muted); font-weight: 600; }
+.tile .r { display: block; font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+/* the model page's sticker carries the card facts and the compare-with links too */
+.pick-meta { flex-basis: 100%; margin: 0; font-size: 0.9rem; color: var(--ink-2); }
+.pick-meta strong { color: var(--ink); }
+.pick-stat[data-tip] .k { cursor: help; text-decoration: underline dotted var(--muted); text-underline-offset: 3px; }
+.coverage { flex-basis: 100%; margin: 0; font-size: 0.9rem; color: var(--ink-2); }
+.coverage strong { color: var(--ink); }
+.coverage .n[tabindex] { cursor: help; text-decoration: underline dotted var(--muted); text-underline-offset: 3px; }
+
+.compare-list { display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: center; margin: 6px 0 2px; }
+.compare-list .why { color: var(--muted); font-size: 0.8rem; margin-left: 6px; }
+
+/* ---------- chips & badges ---------- */
+
+.chip-cloud { display: flex; flex-wrap: wrap; gap: 7px; margin: 8px 0 4px; }
+
+.chip {
+  font-family: var(--font-body);
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  padding: 3px 12px;
+  cursor: pointer;
+}
+
+a.chip { text-decoration: none; }
+
+.chip:hover { background: var(--pink-light); }
+.chip[aria-pressed="true"] { background: var(--pink); font-weight: 700; }
+.chip.static { cursor: default; }
+.chip.static:hover { background: var(--surface); }
+
+.badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--wine-deep);
+  background: var(--pink-light);
+  border: 1px solid var(--wine-deep);
+  border-radius: 6px;
+  padding: 1px 6px;
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
+.badge.off { color: var(--muted); background: transparent; border-color: var(--baseline); }
+
+/* ---------- tables ---------- */
+
+.table-wrap { overflow-x: auto; }
+
+table.data {
+  border-collapse: collapse;
+  width: 100%;
+  background: var(--surface);
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 0.9rem;
+}
+
+/* border-radius on tables needs the wrapper trick */
+.table-wrap { border: 2px solid var(--ink); border-radius: 12px; background: var(--surface); }
+.table-wrap table.data { border: none; }
+
+table.data th, table.data td { padding: 7px 12px; text-align: left; }
+
+table.data thead th {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.8rem;
+  color: var(--ink);
+  background: var(--pink-light);
+  border-bottom: 2px solid var(--ink);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+}
+
+table.data th button {
+  all: unset;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  display: inline-block;
+}
+
+table.data th button::after { content: " ↕"; color: var(--muted); font-size: 0.75rem; }
+table.data th[aria-sort="ascending"] button::after { content: " ↑"; color: var(--wine-deep); }
+table.data th[aria-sort="descending"] button::after { content: " ↓"; color: var(--wine-deep); }
+/* right-aligned columns put the arrow first so the label ends where the numbers end */
+table.data th.num button::after { content: none; }
+table.data th.num button::before { content: "↕ "; color: var(--muted); font-size: 0.75rem; }
+table.data th.num[aria-sort="ascending"] button::before { content: "↑ "; color: var(--wine-deep); }
+table.data th.num[aria-sort="descending"] button::before { content: "↓ "; color: var(--wine-deep); }
+
+table.data tbody tr { border-top: 1px solid var(--grid); }
+table.data tbody tr:hover { background: #fdf3da; }
+
+table.data td.num, table.data th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+table.data td.model-name { font-family: var(--font-mono); font-size: 0.84rem; white-space: nowrap; }
+table.data td.model-name .model-label { color: var(--ink); font-weight: 700; }
+table.data td.nowrap { white-space: nowrap; }
+/* the CI / rank after a value sits in a fixed-width box so the values
+   themselves line up down the column whatever the suffix's digit count */
+table.data td .ci, table.data td .rk {
+  display: inline-block;
+  text-align: right;
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin-left: 6px;
+  font-variant-numeric: tabular-nums;
+}
+table.data td .ci { min-width: 11ch; }
+table.data td .rk { min-width: 3ch; }
+table.data td.dim { color: var(--muted); }
+table.data td .trunc {
+  display: inline-block;
+  max-width: 15ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+table.data tr.partial td { color: var(--ink-2); }
+table.data td .err-main { font-weight: 700; }
+table.data tr:first-child td .rank-badge { background: var(--pink); }
+
+.rank-badge {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.78rem;
+  min-width: 22px;
+  text-align: center;
+  border: 1.5px solid var(--ink);
+  border-radius: 7px;
+  background: var(--surface);
+  padding: 0 3px;
+}
+
+.note-mark { color: var(--series-2); cursor: help; font-weight: 700; }
+
+/* ---------- charts ---------- */
+
+.chart-card { padding: 14px 18px 8px; }
+
+.chart-title { font-family: var(--font-display); font-weight: 800; font-size: 1.02rem; margin: 2px 0 0; }
+.chart-sub { color: var(--ink-2); font-size: 0.84rem; margin: 2px 0 8px; }
+
+svg.chart { display: block; width: 100%; height: auto; font-family: var(--font-body); }
+
+svg.chart text { fill: var(--ink-2); font-size: 11.5px; }
+svg.chart .axis-label { fill: var(--muted); font-size: 11px; }
+svg.chart .tick-label { fill: var(--muted); font-size: 10.5px; font-variant-numeric: tabular-nums; }
+svg.chart .gridline { stroke: var(--grid); stroke-width: 1; }
+svg.chart .baseline { stroke: var(--baseline); stroke-width: 1; }
+svg.chart .ref-line { stroke: var(--muted); stroke-width: 1; }
+svg.chart .ref-label { fill: var(--muted); font-size: 10px; }
+svg.chart .direct-label { fill: var(--ink); font-size: 10.5px; font-family: var(--font-mono); }
+svg.chart .bar-value { fill: var(--ink-2); font-size: 10.5px; font-variant-numeric: tabular-nums; }
+svg.chart .diff-value { font-weight: 700; }
+svg.chart .diff-vs { fill: var(--muted); }
+svg.chart .bar-rank { fill: var(--muted); font-size: 10px; }
+svg.chart .ref-mark { fill: var(--surface); stroke: var(--wine-deep); stroke-width: 1.5; }
+svg.chart .spread { stroke: var(--baseline); stroke-width: 1.5; }
+svg.chart .zebra { fill: var(--cream); opacity: 0.55; }
+svg.chart .center { stroke: var(--ink-2); stroke-width: 1.2; }
+svg.chart .head-label { fill: var(--ink-2); font-size: 11px; font-weight: 600; }
+svg.chart .strip-empty { fill: none; stroke: var(--baseline); stroke-width: 1; }
+
+.legend { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin: 6px 2px 8px; font-size: 0.82rem; color: var(--ink-2); }
+.legend .key { display: inline-flex; align-items: center; gap: 6px; }
+.legend .swatch { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+.legend .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.legend .ring { width: 9px; height: 9px; border-radius: 50%; display: inline-block; border: 2px solid var(--series-1); background: transparent; }
+.legend .tie-swatch { position: relative; background: var(--series-1); }
+.legend .tie-swatch::after { content: ""; position: absolute; inset: 3.5px; border-radius: 50%; background: var(--surface); }
+.legend .empty-swatch { background: transparent; border: 1px solid var(--baseline); }
+
+/* heatmap */
+.heat-scroll { overflow-x: auto; padding-bottom: 6px; }
+
+/* ---------- tooltip ---------- */
+
+.tooltip {
+  position: fixed;
+  z-index: 50;
+  pointer-events: none;
+  background: var(--ink);
+  color: var(--cream);
+  border-radius: 9px;
+  padding: 8px 11px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  max-width: 300px;
+  box-shadow: 0 3px 10px rgba(56, 39, 49, 0.35);
+}
+
+.tooltip .t-title { font-family: var(--font-mono); font-weight: 700; display: block; margin-bottom: 2px; }
+.tooltip .t-row { display: flex; justify-content: space-between; gap: 14px; }
+.tooltip .t-row .val { font-weight: 700; font-variant-numeric: tabular-nums; }
+.tooltip .t-row .lbl { color: #d9c8b8; }
+
+/* ---------- sections & footer ---------- */
+
+.section-gap { height: 8px; }
+
+.claimed-note { margin: 14px 0 0; }
+.claimed-note summary { cursor: pointer; font-weight: 600; color: var(--ink-2); font-size: 0.9rem; }
+
+.site-footer {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 18px 24px 40px;
+  border-top: 2px solid var(--ink);
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.site-footer code { font-family: var(--font-mono); font-size: 0.78rem; }
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 640px) {
+  body { font-size: 14px; }
+  .wordmark-name { font-size: 1.9rem; }
+  .wordmark { gap: 0.5em; }
+  .wordmark-text { top: -1px; }
+  .handy-hand { height: 3.1rem; }
+  main, .site-header, .site-footer { padding-left: 14px; padding-right: 14px; }
+  .pick-card { gap: 12px 20px; }
+  .pick-model { font-size: 1.15rem; }
+  :root { --combo-w: 100%; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .chip, .tabs a, .btn { transition: background-color 120ms ease; }
+}
+
+/* ---------- picks in the table + auto-detect warning ---------- */
+
+tr.is-pick td { background: rgba(250, 162, 202, 0.16); }
+table.data tbody tr.is-pick:hover td { background: rgba(250, 162, 202, 0.3); }
+
+.model-cell { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+.pick-tag {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--wine-deep);
+  background: var(--pink-light);
+  border: 1px solid var(--wine-deep);
+  border-radius: 6px;
+  padding: 0 6px;
+  white-space: nowrap;
+}
+.pick-tag[title] { cursor: help; }
+.pick-tag--overall { background: var(--pink); }
+
+.warn-icon {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.4;
+  color: var(--wine-deep);
+  background: var(--cream);
+  border: 1px solid var(--wine-deep);
+  border-radius: 6px;
+  padding: 0 7px;
+  cursor: help;
+  flex: none;
+}

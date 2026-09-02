@@ -1,0 +1,26 @@
+---
+/* The language-set picker. Server-renders a <select multiple>; combobox.ts
+   turns it into a token field on load. data-set="nav" navigates on any
+   change (static pages); "island" lets the set view (langset.ts) enhance it
+   itself and render in place. */
+import type { Derived } from '../lib/derive';
+
+interface Props { d: Derived; set: string[]; island?: boolean }
+const { d, set, island = false } = Astro.props;
+const chosen = new Set(set);
+---
+<div class="filter-row">
+  <label for="lang-sel">languages</label>
+  <select id="lang-sel" multiple data-set={island ? 'island' : 'nav'} data-set-base="/languages" data-placeholder="add a language…">
+    <optgroup label={`benchmarked (${d.testedLangs.length})`}>
+      {d.testedLangs.map(l => (
+        <option value={l.code} data-token={l.name} selected={chosen.has(l.code)}>{l.name} ({l.code})</option>
+      ))}
+    </optgroup>
+    <optgroup label={`on model cards only (${d.claimedOnlyLangs.length})`}>
+      {d.claimedOnlyLangs.map(l => (
+        <option value={l.code} data-token={l.name} selected={chosen.has(l.code)}>{l.name} ({l.code})</option>
+      ))}
+    </optgroup>
+  </select>
+</div>

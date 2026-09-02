@@ -1,0 +1,97 @@
+---
+/* The "languages" view: leaderboard for one language. */
+import type { Derived } from '../lib/derive';
+import { fmtX, fmtGB } from '../lib/format';
+import LanguageSelect from './LanguageSelect.astro';
+import ErrCell from './ErrCell.astro';
+import Scatter from './Scatter.astro';
+import ClaimedOnlyLanguage from './ClaimedOnlyLanguage.astro';
+import PickTags from './PickTags.astro';
+import AutoDetectBadge from './AutoDetectBadge.astro';
+
+interface Props { d: Derived; lang: string }
+const { d, lang } = Astro.props;
+const info = d.lang(lang)!;
+const quant = d.quant;
+const metricName = d.metricLabel(lang);
+
+const cells = d.cellsForLang(lang).sort((a, b) => a.err - b.err);
+
+/* three picks: overall / most accurate / fast, tagged in the table */
+const picks = d.pickThree(cells.map(c => ({ model: c.model, err: c.err })));
+const isPick = (m: string) => [picks.overall, picks.accurate, picks.fast].some(p => p?.model === m);
+
+const rows = cells.map((c, i) => ({ ...c, rank: i + 1, m: d.model(c.model) }));
+
+/* models that claim the language but were not benchmarked */
+const testedSet = new Set(cells.map(c => c.model));
+const claimers = d.modelNames.filter(m => d.claims(m).has(lang) && !testedSet.has(m));
+const offCard = cells.filter(c => !d.claims(c.model).has(lang));
+
+const scatterPayload = {
+  langText: `${info.name} · ${cells.length} models`,
+  points: cells.map(c => ({
+    model: c.model, err: c.err, metricName,
+    extraTip: [['size', fmtGB(d.sizeOf(c.model))]] as [string, string][],
+  })),
+  perf: Object.fromEntries(cells.map(c => [c.model, d.model(c.model).perf])),
+};
+
+const s = (v: number | string | null | undefined) => v == null ? '' : String(v);
+---
+<h2 class="view-title">best model by language</h2>
+<p class="view-sub">Benchmarked on the FLEURS test split at {quant}. Error is {info.tested ? metricName : 'WER/CER'} — lower is better. Speed is × realtime on Handy target hardware.</p>
+
+<LanguageSelect d={d} set={[lang]} />
+
+{!info.tested ? (
+  <ClaimedOnlyLanguage d={d} lang={lang} />
+) : (
+  <Fragment>
+    <Scatter payload={scatterPayload} />
+
+    <div class="table-wrap">
+      <table class="data" data-sortable data-default-sort="err" data-default-desc="false">
+        <thead>
+          <tr>
+            <th class="num" data-key="rank"><button type="button">#</button></th>
+            <th data-key="model"><button type="button">model</button></th>
+            <th class="num" data-key="err"><button type="button">{metricName} % (95% CI)</button></th>
+            <th class="num" data-key="rgpu" title="Vulkan, × realtime"><button type="button">AMD 4750U GPU</button></th>
+            <th class="num" data-key="rcpu" title="× realtime"><button type="button">AMD 4750U CPU</button></th>
+            <th class="num" data-key="size" title={`${quant} GGUF size`}><button type="button">size</button></th>
+            <th data-key="lic"><button type="button">license</button></th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(r => (
+            <tr class={isPick(r.model) ? 'is-pick' : undefined}>
+              <td class="num" data-sort={r.rank}><span class="rank-badge">{r.rank}</span></td>
+              <td class="model-name" data-sort={r.model}><span class="model-cell"><span class="model-label">{r.model}</span><AutoDetectBadge d={d} model={r.model} /><PickTags picks={picks} model={r.model} /></span></td>
+              <td class="num" data-sort={r.err}><ErrCell cell={r} /></td>
+              <td class="num" data-sort={s(d.perfOf(r.model, 'r-gpu'))}>{fmtX(d.perfOf(r.model, 'r-gpu'))}</td>
+              <td class="num" data-sort={s(d.perfOf(r.model, 'r-cpu'))}>{fmtX(d.perfOf(r.model, 'r-cpu'))}</td>
+              <td class="num" data-sort={s(d.sizeOf(r.model))}>{fmtGB(d.sizeOf(r.model))}</td>
+              <td data-sort={r.m.license || ''}><span class="dim trunc" title={r.m.license || undefined}>{r.m.license || '?'}</span></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    {claimers.length > 0 && (
+      <details class="claimed-note">
+        <summary>claims {info.name} on its model card but not benchmarked ({claimers.length})</summary>
+        <div class="chip-cloud">
+          {claimers.map(m => (
+            <a class="chip" href={`/models/${encodeURIComponent(m)}`}>{m}</a>
+          ))}
+        </div>
+      </details>
+    )}
+
+    {offCard.length > 0 && (
+      <p class="hint">Benchmarked but not listed on the model card: {offCard.map(c => c.model).join(', ')}.</p>
+    )}
+  </Fragment>
+)}

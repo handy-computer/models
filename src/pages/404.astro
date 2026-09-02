@@ -1,0 +1,8 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { DEFAULT_LANG, pageTitle } from '../lib/config';
+---
+<Layout view={null} title={pageTitle('not found')}>
+  <h2 class="view-title">nothing here</h2>
+  <p class="view-sub">That page does not exist. Try the <a href={`/languages/${DEFAULT_LANG}`}>language leaderboard</a>.</p>
+</Layout>

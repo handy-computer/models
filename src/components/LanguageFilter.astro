@@ -1,0 +1,18 @@
+---
+/* The optional language focus on the model views: a token field over the
+   benchmarked languages, empty meaning all of them. Rendered as label +
+   <select multiple> for the caller's filter row; modelpage.ts / modelset.ts
+   enhance it (data-set="filter", so nav.ts leaves it alone) and keep its
+   state in ?langs=. */
+import type { Derived } from '../lib/derive';
+
+interface Props { d: Derived; set: string[] }
+const { d, set } = Astro.props;
+const chosen = new Set(set);
+---
+<label for="lang-filter">languages</label>
+<select id="lang-filter" class="lang-filter" multiple data-set="filter" data-placeholder="all · add one to focus…">
+  {d.testedLangs.map(l => (
+    <option value={l.code} data-token={l.name} selected={chosen.has(l.code)}>{l.name} ({l.code})</option>
+  ))}
+</select>

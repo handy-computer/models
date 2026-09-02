@@ -1,0 +1,51 @@
+---
+/* A language that appears on model cards but has no FLEURS run. */
+import type { Derived } from '../lib/derive';
+import { fmtX, fmtGB } from '../lib/format';
+
+interface Props { d: Derived; lang: string }
+const { d, lang } = Astro.props;
+const info = d.lang(lang)!;
+
+const claimers = d.modelNames.filter(m => d.claims(m).has(lang));
+const rows = claimers.map(m => ({ model: m, m: d.model(m) }))
+  .sort((a, b) => {
+    const av = d.perfOf(a.model, 'r-gpu'), bv = d.perfOf(b.model, 'r-gpu');
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    return bv - av;
+  });
+const s = (v: number | string | null | undefined) => v == null ? '' : String(v);
+---
+<div class="card">
+  <h3>{info.name} — not benchmarked yet</h3>
+  <p>No FLEURS run for this language. The models below list it on their card, so they should work — accuracy is unverified. Speed and size still apply.</p>
+</div>
+
+<div class="table-wrap">
+  <table class="data" data-sortable data-default-sort="rgpu" data-default-desc="true">
+    <thead>
+      <tr>
+        <th data-key="model"><button type="button">model</button></th>
+        <th class="num" data-key="nlang"><button type="button">card languages</button></th>
+        <th class="num" data-key="rgpu"><button type="button">AMD 4750U GPU</button></th>
+        <th class="num" data-key="rcpu"><button type="button">AMD 4750U CPU</button></th>
+        <th class="num" data-key="size"><button type="button">size</button></th>
+        <th data-key="lic"><button type="button">license</button></th>
+      </tr>
+    </thead>
+    <tbody>
+      {rows.map(r => (
+        <tr>
+          <td class="model-name" data-sort={r.model}><span class="model-label">{r.model}</span></td>
+          <td class="num" data-sort={s(r.m.n_card_languages)}>{r.m.n_card_languages ?? '—'}</td>
+          <td class="num" data-sort={s(d.perfOf(r.model, 'r-gpu'))}>{fmtX(d.perfOf(r.model, 'r-gpu'))}</td>
+          <td class="num" data-sort={s(d.perfOf(r.model, 'r-cpu'))}>{fmtX(d.perfOf(r.model, 'r-cpu'))}</td>
+          <td class="num" data-sort={s(d.sizeOf(r.model))}>{fmtGB(d.sizeOf(r.model))}</td>
+          <td data-sort={r.m.license || ''}><span class="dim trunc" title={r.m.license || undefined}>{r.m.license || '?'}</span></td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>

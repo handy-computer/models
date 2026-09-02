@@ -1,0 +1,13 @@
+{
+  // Cloudflare Workers static assets, same shape as handy.computer.
+  // `bun run deploy` builds and uploads ./dist.
+  "name": "handy-models",
+  "compatibility_date": "2026-08-01",
+  // Serve at models.handy.computer. With custom_domain, `wrangler deploy`
+  // creates the DNS record in the handy.computer zone on first deploy.
+  "routes": [{ "pattern": "models.handy.computer", "custom_domain": true }],
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  }
+}

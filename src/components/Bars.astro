@@ -1,0 +1,13 @@
+---
+/* Host for the per-language bar chart; src/scripts/bars.ts fills it on load. */
+import { jsonForScript } from '../lib/json';
+import type { BarsPayload } from '../scripts/bars';
+
+interface Props { payload: BarsPayload }
+const { payload } = Astro.props;
+---
+<div data-bars><script is:inline type="application/json" set:html={jsonForScript(payload)}></script></div>
+<script>
+  import { mountBars } from '../scripts/bars';
+  mountBars();
+</script>

@@ -1,0 +1,31 @@
+{
+  "name": "models.handy.computer",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "dev": "NODE_OPTIONS=--disable-warning=ExperimentalWarning astro dev",
+    "build": "NODE_OPTIONS=--disable-warning=ExperimentalWarning astro build",
+    "preview": "NODE_OPTIONS=--disable-warning=ExperimentalWarning astro preview",
+    "check": "NODE_OPTIONS=--disable-warning=ExperimentalWarning astro check",
+    "deploy": "NODE_OPTIONS=--disable-warning=ExperimentalWarning astro build && wrangler deploy",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^7.2.10"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@types/node": "^22",
+    "typescript": "^5",
+    "wrangler": "^4"
+  },
+  "allowScripts": {
+    "esbuild": true,
+    "workerd": true,
+    "sharp": true
+  }
+}

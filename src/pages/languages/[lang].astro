@@ -1,0 +1,21 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import LanguageView from '../../components/LanguageView.astro';
+import { loadDerived } from '../../lib/db';
+import { pageTitle } from '../../lib/config';
+
+export function getStaticPaths() {
+  const d = loadDerived();
+  return [...d.testedLangs, ...d.claimedOnlyLangs].map(l => ({ params: { lang: l.code } }));
+}
+
+const lang = Astro.params.lang!;
+const d = loadDerived();
+const info = d.lang(lang)!;
+const description = info.tested
+  ? `Which speech-to-text model is most accurate for ${info.name} in Handy: every benchmarked model ranked by ${info.metric === 'cer' ? 'character' : 'word'} error rate on FLEURS, with confidence intervals, speed and size.`
+  : `Speech-to-text models whose model card lists ${info.name}, with speed, size and license. Not yet benchmarked for Handy.`;
+---
+<Layout view="languages" title={pageTitle(info.name)} description={description}>
+  <LanguageView d={d} lang={lang} />
+</Layout>

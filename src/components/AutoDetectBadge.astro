@@ -1,0 +1,10 @@
+---
+/* "!" icon for models without automatic language detection; the tooltip explains. */
+import type { Derived } from '../lib/derive';
+import { jsonForScript } from '../lib/json';
+
+interface Props { d: Derived; model: string; multi?: boolean }
+const { d, model, multi = false } = Astro.props;
+const note = d.autoDetectNote(model, multi);
+---
+{note && <span class="warn-icon" role="img" tabindex="0" aria-label={note} title={note} data-tip={jsonForScript({ t: 'no auto language detection', r: [[note, '']] })}>!</span>}

@@ -1,0 +1,15 @@
+---
+/* Small tags after a model name marking it as a pick (overall / most accurate / fast).
+   Only the overall pick carries a tooltip. */
+import type { Picks } from '../lib/derive';
+import { pickTagsFor } from '../lib/derive';
+import { jsonForScript } from '../lib/json';
+
+interface Props { picks: Picks; model: string }
+const { picks, model } = Astro.props;
+const tags = pickTagsFor(picks, model);
+---
+{tags.map(t => t.tip
+  ? <span class={`pick-tag pick-tag--${t.key}`} tabindex="0" title={t.tip} data-tip={jsonForScript({ t: t.label, r: [[t.tip, '']] })}>{t.label}</span>
+  : <span class={`pick-tag pick-tag--${t.key}`}>{t.label}</span>
+)}

@@ -1,0 +1,14 @@
+---
+/* Placeholder host for the accuracy-vs-speed scatter; src/scripts/scatter.ts
+   replaces it with the live chart section on load. */
+import { jsonForScript } from '../lib/json';
+import type { ScatterPayload } from '../scripts/scatter';
+
+interface Props { payload: ScatterPayload }
+const { payload } = Astro.props;
+---
+<div data-scatter><script is:inline type="application/json" set:html={jsonForScript(payload)}></script></div>
+<script>
+  import { mountScatters } from '../scripts/scatter';
+  mountScatters();
+</script>

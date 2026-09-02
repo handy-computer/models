@@ -1,0 +1,12 @@
+---
+/* "/" is the default language leaderboard. */
+import Layout from '../layouts/Layout.astro';
+import LanguageView from '../components/LanguageView.astro';
+import { loadDerived } from '../lib/db';
+import { DEFAULT_LANG } from '../lib/config';
+
+const d = loadDerived();
+---
+<Layout view="languages">
+  <LanguageView d={d} lang={DEFAULT_LANG} />
+</Layout>

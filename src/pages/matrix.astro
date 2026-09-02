@@ -1,0 +1,80 @@
+---
+/* The "matrix" view: every model × every benchmarked language as a heatmap,
+   rendered entirely on the server. Tooltips are wired by data-tip. */
+import Layout from '../layouts/Layout.astro';
+import { loadDerived } from '../lib/db';
+import { pageTitle, ERR_SCALE_MAX } from '../lib/config';
+import { RAMP, rampColor } from '../lib/palette';
+import { fmtErr } from '../lib/format';
+import { jsonForScript } from '../lib/json';
+
+const d = loadDerived();
+const langs = d.testedLangs.map(l => l.code);
+
+const models = d.modelNames.map(m => {
+  const cells = d.cellsForModel(m);
+  const mean = cells.length ? cells.reduce((s, c) => s + c.err, 0) / cells.length : Infinity;
+  return { m, n: cells.length, mean };
+}).sort((a, b) => b.n - a.n || a.mean - b.mean).map(x => x.m);
+
+const CELL = 20, ROWLBL = 215, COLHDR = 34;
+const gridStyle =
+  `display:grid; grid-template-columns:${ROWLBL}px repeat(${langs.length}, ${CELL}px);` +
+  `grid-template-rows:${COLHDR}px; grid-auto-rows:${CELL}px; gap:2px; width:max-content;` +
+  `background:var(--surface); border:2px solid var(--ink); border-radius:12px; padding:10px;`;
+const colHdrStyle =
+  `font-size:10px; font-family:var(--font-mono); text-decoration:none; color:var(--ink-2);` +
+  `display:flex; align-items:end; justify-content:center; height:${COLHDR}px`;
+const rowHdrStyle =
+  'font-size:10.5px; font-family:var(--font-mono); color:var(--ink); text-decoration:none;' +
+  'display:flex; align-items:center; justify-content:end; padding-right:8px; overflow:hidden; white-space:nowrap;';
+---
+<Layout view="matrix" title={pageTitle('matrix')}
+  description="Every speech-to-text model against every benchmarked language as a heatmap of error rates, with the languages a model claims but has not been tested on marked.">
+  <h2 class="view-title">the whole grid</h2>
+  <p class="view-sub">Every model × every benchmarked language. Darker is worse. A ring means the model card claims the language but there is no benchmark. Click any cell for the language leaderboard.</p>
+
+  <div class="legend">
+    <span>error %:</span>
+    {RAMP.map((c, i) => {
+      const v = Math.round(i / (RAMP.length - 1) * ERR_SCALE_MAX);
+      return <span class="key"><span class="swatch" style={`background:${c}`}></span>{i === RAMP.length - 1 ? `${v}+` : String(v)}</span>;
+    })}
+    <span class="key"><span class="ring"></span>claimed, not benchmarked</span>
+  </div>
+
+  <div class="heat-scroll">
+    <div style={gridStyle}>
+      <div></div>
+      {langs.map(l => (
+        <a href={`/languages/${l}`} title={d.langName(l)} style={colHdrStyle}>{l}</a>
+      ))}
+      {models.map(m => (
+        <Fragment>
+          <a href={`/models/${encodeURIComponent(m)}`} title={m} style={rowHdrStyle}>{m}</a>
+          {langs.map(l => {
+            const c = d.cell(m, l);
+            const claimed = d.claims(m).has(l);
+            if (c) {
+              return <a href={`/languages/${l}`}
+                style={`background:${rampColor(c.err)}; border-radius:5px; display:block;`}
+                aria-label={`${m}, ${d.langName(l)}: ${fmtErr(c.err)}%`}
+                data-tip={jsonForScript({ t: m, r: [[d.langName(l), ''], [c.metric.toUpperCase(), fmtErr(c.err) + '%'], ['95% CI', `${fmtErr(c.lo)}–${fmtErr(c.hi)}`]] })}></a>;
+            }
+            if (claimed) {
+              return <a href={`/languages/${l}`}
+                style="display:flex; align-items:center; justify-content:center;"
+                aria-label={`${m}, ${d.langName(l)}: claimed, not benchmarked`}
+                data-tip={jsonForScript({ t: m, r: [[d.langName(l), ''], ['card claims it, not benchmarked', '']] })}>
+                <span style="width:8px; height:8px; border-radius:50%; border:2px solid var(--series-1); display:block;"></span>
+              </a>;
+            }
+            return <div aria-hidden="true"></div>;
+          })}
+        </Fragment>
+      ))}
+    </div>
+  </div>
+
+  <p class="hint">The {d.claimedOnlyLangs.length} card-only languages (Whisper’s long tail) are not columns here — find them under languages → “on model cards only”.</p>
+</Layout>

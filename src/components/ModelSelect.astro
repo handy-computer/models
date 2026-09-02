@@ -1,0 +1,18 @@
+---
+/* The model-set picker: same token combobox as the languages one.
+   data-set="nav" navigates on any change (the static model page); "island"
+   lets the set view (modelset.ts) enhance it itself and render in place. */
+import type { Derived } from '../lib/derive';
+
+interface Props { d: Derived; set: string[]; island?: boolean }
+const { d, set, island = false } = Astro.props;
+const chosen = new Set(set);
+---
+<div class="filter-row">
+  <label for="model-sel">models</label>
+  <select id="model-sel" class="wide" multiple data-set={island ? 'island' : 'nav'} data-set-base="/models" data-placeholder="add a model…">
+    {d.modelNames.map(m => (
+      <option value={m} selected={chosen.has(m)}>{m}</option>
+    ))}
+  </select>
+</div>

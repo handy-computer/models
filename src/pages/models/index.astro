@@ -1,0 +1,33 @@
+---
+/* The model set view: two or more models, /models?set=a,b,c, with an
+   optional language focus (&langs=de,fr). The server renders the shell, the
+   pickers, and the whole dataset; src/scripts/modelset.ts owns
+   #modelset-results. A bare /models, or a set of one, forwards to the
+   static single-model page. */
+import Layout from '../../layouts/Layout.astro';
+import ModelSelect from '../../components/ModelSelect.astro';
+import LanguageFilter from '../../components/LanguageFilter.astro';
+import { loadDerived } from '../../lib/db';
+import { pageTitle } from '../../lib/config';
+import { jsonForScript } from '../../lib/json';
+
+const d = loadDerived();
+---
+<Layout view="models" title={pageTitle('compare models')}
+  description="Head-to-head comparison of speech-to-text models on the Handy benchmarks: shared languages, who leads where, speed, size and capabilities.">
+  <h2 class="view-title">compare models</h2>
+  <p class="view-sub">Head to head at {d.quant} over the languages every model in the set covers, speed on an AMD Ryzen 4750U laptop, and capabilities side by side. Add languages to focus the comparison on the ones you care about.</p>
+
+  <ModelSelect d={d} set={[]} island />
+  <div class="filter-row">
+    <LanguageFilter d={d} set={[]} />
+  </div>
+
+  <div id="modelset-results"><p class="hint">Loading…</p></div>
+
+  <script is:inline type="application/json" id="modelset-data" set:html={jsonForScript(d.D)}></script>
+  <script>
+    import { initModelSet } from '../../scripts/modelset';
+    initModelSet();
+  </script>
+</Layout>

@@ -1,0 +1,11 @@
+---
+import type { ModelInfo } from '../lib/types';
+import { features } from '../lib/features';
+
+interface Props { m: ModelInfo; compact?: boolean }
+const { m, compact = false } = Astro.props;
+const on = features(m);
+---
+<span>{on.length === 0
+  ? <span class="dim">—</span>
+  : on.map(f => <span class="badge" title={f.full}>{compact ? f.short : f.full}</span>)}</span>
