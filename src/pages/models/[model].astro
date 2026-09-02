@@ -72,13 +72,13 @@ const payload = { model, rows, speeds, rigs: MODEL_RIGS };
       <span class="key"><span class="dot" style="background:var(--series-2)"></span>best other model error</span>
       <span class="key"><span class="dot" style="background:var(--de-emph)"></span>tie: the 95% CIs overlap</span>
     </div>
-    <div id="standing-chart"></div>
+    <div id="standing-chart" class="chart-mount" style={`--chart-aspect: 860 / ${56 + rows.length * 24}`}></div>
   </div>
 
   <div class="card chart-card">
     <p class="chart-title">speed · all {d.modelNames.length} models on the <span id="strip-rig">{rig0.short}</span></p>
     <p class="chart-sub">× realtime, log scale. Left of the realtime marker, transcribing takes longer than the recording. Hover a dot for the model.</p>
-    <div id="speed-strip"></div>
+    <div id="speed-strip" class="chart-mount" style="--chart-aspect: 860 / 109"></div>
   </div>
 
   {suggestions.length > 0 && (

@@ -1,13 +1,33 @@
 ---
-/* Placeholder host for the accuracy-vs-speed scatter; src/scripts/scatter.ts
-   replaces it with the live chart section on load. */
+/* Server-render a same-size chart shell so the table below does not flash at
+   the top of the page and then jump down while the chart module loads.
+   src/scripts/scatter.ts replaces the whole shell with the live chart. */
 import { jsonForScript } from '../lib/json';
+import { RIGS } from '../lib/config';
 import type { ScatterPayload } from '../scripts/scatter';
 
 interface Props { payload: ScatterPayload }
 const { payload } = Astro.props;
+const rig = RIGS[0];
 ---
-<div data-scatter><script is:inline type="application/json" set:html={jsonForScript(payload)}></script></div>
+<div data-scatter class="card chart-card chart-pending" aria-busy="true">
+  <p class="chart-title">accuracy vs speed</p>
+  <p class="chart-sub">{payload.langText} · left is slower, down is better · log speed axis</p>
+  <div class="filter-row">
+    <label>speed on</label>
+    <span class="chart-pending-control">{rig.label}</span>
+  </div>
+  <svg class="chart chart-pending-plot" viewBox="0 0 860 380" aria-hidden="true">
+    {[80, 144, 208, 272, 334].map(y => <line class="gridline" x1="52" x2="710" y1={y} y2={y} />)}
+    {[140, 250, 360, 470, 580, 690].map(x => <line class="gridline" x1={x} x2={x} y1="16" y2="334" />)}
+    <line class="baseline" x1="52" x2="710" y1="334" y2="334" />
+  </svg>
+  <div class="legend">
+    <span class="key"><span class="dot" style="background:var(--series-1)"></span>pareto frontier (no model is both faster and more accurate)</span>
+    <span class="key"><span class="dot" style="background:var(--de-emph)"></span>other models</span>
+  </div>
+  <script is:inline type="application/json" set:html={jsonForScript(payload)}></script>
+</div>
 <script>
   import { mountScatters } from '../scripts/scatter';
   mountScatters();

@@ -571,6 +571,31 @@ svg.chart .center { stroke: var(--ink-2); stroke-width: 1.2; }
 svg.chart .head-label { fill: var(--ink-2); font-size: 11px; font-weight: 600; }
 svg.chart .strip-empty { fill: none; stroke: var(--baseline); stroke-width: 1; }
 
+/* Client-drawn charts keep their final footprint in the server HTML. This
+   avoids a large layout jump (most visibly the homepage table moving down)
+   while the small chart modules are being fetched and evaluated. */
+.chart-pending { pointer-events: none; }
+.chart-pending-control {
+  min-height: 37px;
+  min-width: 260px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1.5px solid var(--baseline);
+  border-radius: 9px;
+  padding: 6px 10px;
+}
+.chart-pending-plot { background: linear-gradient(110deg, transparent 35%, rgba(250, 162, 202, 0.1) 50%, transparent 65%); }
+.chart-mount:empty {
+  width: 100%;
+  aspect-ratio: var(--chart-aspect);
+  border-radius: 8px;
+  background:
+    linear-gradient(to right, transparent 49.9%, var(--grid) 50%, transparent 50.1%),
+    repeating-linear-gradient(to bottom, transparent 0 23px, var(--grid) 24px);
+}
+
 .legend { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin: 6px 2px 8px; font-size: 0.82rem; color: var(--ink-2); }
 .legend .key { display: inline-flex; align-items: center; gap: 6px; }
 .legend .swatch { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
