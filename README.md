@@ -7,8 +7,8 @@ rigs, quantizations and evaluations without changing the site identity.
 
 Built with Astro. Every page is pre-rendered directly from `wer.db`; there is
 no export step or second data format. Deployed as Cloudflare Workers static
-assets on `models.handy.computer` (worker `handy-models`, custom domain in
-`wrangler.jsonc`).
+assets on `models.handy.computer` (worker `models-handy-computer`, custom
+domain in `wrangler.jsonc`).
 
 ## Run it
 
