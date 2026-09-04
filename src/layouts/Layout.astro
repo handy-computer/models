@@ -1,10 +1,9 @@
 ---
 import '../styles/global.css';
 import HandyHand from '../components/HandyHand.astro';
-import { loadDerived } from '../lib/db';
 import { SITE_NAME, WORDMARK, SITE_URL, HANDY_URL, ENGINE_URL, SITE_TITLE, SITE_DESCRIPTION, DEFAULT_LANG, DEFAULT_MODEL } from '../lib/config';
 
-type View = 'languages' | 'models' | 'matrix';
+type View = 'languages' | 'models' | 'matrix' | 'recommendations';
 
 interface Props {
   title?: string;
@@ -20,13 +19,12 @@ const canonical = new URL(Astro.url.pathname, SITE_URL).href;
 /* The 404 page (view null) has no address of its own: no canonical, and
    keep it out of search indexes. */
 const indexable = view !== null;
-const d = loadDerived();
-const meta = d.D.meta;
 
 const tabs: { view: View; href: string; label: string }[] = [
   { view: 'languages', href: `/languages/${DEFAULT_LANG}`, label: 'languages' },
-  { view: 'models',    href: `/models/${DEFAULT_MODEL}`,    label: 'models' },
-  { view: 'matrix',    href: '/matrix',                     label: 'matrix' },
+  { view: 'models',          href: `/models/${DEFAULT_MODEL}`, label: 'models' },
+  { view: 'matrix',          href: '/matrix',                  label: 'matrix' },
+  { view: 'recommendations', href: '/recommendations',         label: 'recommendations' },
 ];
 ---
 <!doctype html>
@@ -67,11 +65,6 @@ const tabs: { view: View; href: string; label: string }[] = [
 </header>
 
 <main id="main"><slot /></main>
-
-<footer class="site-footer" id="footer">
-  <p>{d.modelNames.length} models · {d.testedLangs.length} benchmarked languages ({d.claimedOnlyLangs.length} more on cards) · dataset: {meta.dataset || '?'} · accuracy at {meta.wer_quant || '?'} on {meta.wer_gpu || '?'} · generated {meta.generated || '?'}</p>
-  <p>rebuild: <code>{meta.rebuild || ''} &amp;&amp; bun run build</code></p>
-</footer>
 
 <div id="tooltip" class="tooltip" role="status" hidden></div>
 

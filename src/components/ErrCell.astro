@@ -1,6 +1,7 @@
 ---
-/* An error-rate cell: bold value, then a fixed-width box for the 95% CI so
-   the values line up down the column regardless of the CI's digit count. */
+/* An error-rate cell: bold value, plus a note mark when the result carries a
+   caveat. The 95% CI stays in the data and the tooltips; it is not shown in
+   the table to keep the column narrow. */
 import type { Cell } from '../lib/types';
 import { fmtErr } from '../lib/format';
 import { jsonForScript } from '../lib/json';
@@ -10,4 +11,4 @@ const { cell } = Astro.props;
 ---
 {!cell
   ? <span class="dim">—</span>
-  : <span><span class="err-main">{fmtErr(cell.err)}</span><span class="ci">{cell.lo != null && `${fmtErr(cell.lo)}–${fmtErr(cell.hi)}`}{cell.note && <span class="note-mark" tabindex="0" data-tip={jsonForScript({ t: 'note', r: [[cell.note, '']] })}> *</span>}</span></span>}
+  : <span><span class="err-main">{fmtErr(cell.err)}</span>{cell.note && <span class="note-mark" tabindex="0" data-tip={jsonForScript({ t: 'note', r: [[cell.note, '']] })}> *</span>}</span>}

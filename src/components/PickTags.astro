@@ -1,8 +1,8 @@
 ---
 /* Small tags after a model name marking it as a pick (overall / most accurate / fast).
    Only the overall pick carries a tooltip. */
-import type { Picks } from '../lib/derive';
-import { pickTagsFor } from '../lib/derive';
+import type { Picks } from '../lib/recommendation';
+import { pickTagsFor } from '../lib/recommendation';
 import { jsonForScript } from '../lib/json';
 
 interface Props { picks: Picks; model: string }

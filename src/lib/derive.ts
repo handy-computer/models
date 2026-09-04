@@ -2,26 +2,10 @@
    by the set island in the browser. */
 
 import type { Cell, Dataset, LangInfo, ModelInfo } from './types';
-import { RIGS, rigById, SCORE, PICK_RIG } from './config';
+import { RIGS, rigById } from './config';
 
 export interface LangEntry extends LangInfo {
   code: string;
-}
-
-export interface Scored {
-  model: string;
-  err: number;
-  xrt: number;
-  wait: number;
-  score: number;
-}
-
-export interface Picks {
-  overall: Scored | null;
-  accurate: Scored | null;
-  fast: Scored | null;
-  /** models that could not be scored (no speed on the rig) */
-  unscored: string[];
 }
 
 const EMPTY_MODEL: ModelInfo = {
@@ -55,11 +39,25 @@ export class Derived {
     this.modelNames = Object.keys(D.models).sort((a, b) => a.localeCompare(b));
   }
 
-  lang(code: string): LangInfo | undefined { return this.D.languages[code]; }
-  langName(code: string): string { return this.D.languages[code]?.name ?? code; }
+  canonicalLanguage(code: string): string {
+    let current = code.trim().toLowerCase().split('-', 1)[0] || code.trim().toLowerCase();
+    const seen = new Set<string>();
+    while (this.D.languageAliases[current] && !seen.has(current)) {
+      seen.add(current);
+      current = this.D.languageAliases[current]!;
+    }
+    return current;
+  }
+
+  lang(code: string): LangInfo | undefined { return this.D.languages[this.canonicalLanguage(code)]; }
+  langName(code: string): string { return this.lang(code)?.name ?? code; }
   model(name: string): ModelInfo { return this.D.models[name] ?? EMPTY_MODEL; }
   hasModel(name: string): boolean { return name in this.D.models; }
   claims(model: string): Set<string> { return this.claimsSet.get(model) ?? new Set(); }
+  claimsLanguage(model: string, language: string): boolean {
+    const wanted = this.canonicalLanguage(language);
+    return [...this.claims(model)].some(code => this.canonicalLanguage(code) === wanted);
+  }
 
   cell(model: string, lang: string): Cell | undefined {
     return this.cellIndex.get(`${model}|${lang}|${this.quant}`);
@@ -87,37 +85,6 @@ export class Derived {
   metricLabel(lang: string): string {
     const l = this.D.languages[lang];
     return l && l.metric ? l.metric.toUpperCase() : 'err';
-  }
-
-  /** seconds a user waits after speaking for `dictationS` seconds, or null without speed data */
-  waitS(model: string, rigId = PICK_RIG, dictationS = SCORE.dictationS): number | null {
-    const xrt = this.perfOf(model, rigId);
-    if (xrt == null || xrt <= 0) return null;
-    if (this.model(model).streaming && xrt >= 1) return SCORE.streamWaitS;
-    return dictationS / xrt;
-  }
-
-  /** overall / most accurate / fast picks over rows of {model, err}. In a
-      language set (`multi`) a model that cannot switch languages on its own
-      is not eligible as the overall pick: that tag is a recommendation, while
-      the other two only state who is most accurate and who is quickest. */
-  pickThree(rows: { model: string; err: number }[], opts: { multi?: boolean; rigId?: string } = {}): Picks {
-    const rigId = opts.rigId ?? PICK_RIG;
-    const scored: Scored[] = [];
-    const unscored: string[] = [];
-    for (const r of rows) {
-      const xrt = this.perfOf(r.model, rigId);
-      const wait = this.waitS(r.model, rigId);
-      if (xrt == null || wait == null) { unscored.push(r.model); continue; }
-      scored.push({ model: r.model, err: r.err, xrt, wait, score: r.err + SCORE.k * wait });
-    }
-    const first = (cmp: (a: Scored, b: Scored) => number, pool = scored) => [...pool].sort(cmp)[0] ?? null;
-    const eligible = opts.multi ? scored.filter(s => !this.lacksLangDetect(s.model)) : scored;
-    const overall = first((a, b) => a.score - b.score, eligible.length ? eligible : scored);
-    const usable = scored.filter(s => s.wait <= SCORE.accurateMaxWaitS);
-    const accurate = first((a, b) => a.err - b.err, usable.length ? usable : scored);
-    const fast = first((a, b) => (a.err + SCORE.fastK * a.wait) - (b.err + SCORE.fastK * b.wait));
-    return { overall, accurate, fast, unscored };
   }
 
   /** the card says no automatic language detection and the model covers more
@@ -148,25 +115,3 @@ export function perfLookup(perf: Record<string, Record<string, number>> | undefi
 }
 
 export { RIGS };
-
-export type PickKey = 'overall' | 'accurate' | 'fast';
-
-export interface PickTag {
-  key: PickKey;
-  label: string;
-  /** tooltip; only the overall pick has one, the other labels speak for themselves */
-  tip?: string;
-}
-
-/** the pick tags a model earned; the scoring is documented in the README ("Picks") */
-export function pickTagsFor(picks: Picks, model: string): PickTag[] {
-  const out: PickTag[] = [];
-  const add = (key: PickKey, label: string, s: Scored | null, tip?: string) => {
-    if (!s || s.model !== model) return;
-    out.push({ key, label, tip });
-  };
-  add('overall', 'overall pick', picks.overall, 'the best overall blend of accuracy and speed');
-  add('accurate', 'most accurate', picks.accurate);
-  add('fast', 'fast pick', picks.fast);
-  return out;
-}

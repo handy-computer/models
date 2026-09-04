@@ -32,6 +32,11 @@ function read(db: DatabaseSync): Dataset {
   const meta: Record<string, string> = {};
   for (const r of rows('SELECT key, value FROM meta')) meta[String(r.key)] = String(r.value ?? '');
 
+  const languageAliases: Record<string, string> = {};
+  for (const r of rows('SELECT alias, canonical FROM language_aliases ORDER BY alias')) {
+    languageAliases[String(r.alias)] = String(r.canonical);
+  }
+
   // All claimed language codes have canonical rows. A language is tested on
   // this site when the DB has at least one Q8_0 FLEURS result for it.
   const languages: Record<string, LangInfo> = {};
@@ -114,7 +119,7 @@ function read(db: DatabaseSync): Dataset {
     lo: num(r.ci_lo), hi: num(r.ci_hi), n: num(r.n_utts), note: str(r.note) || null,
   }));
 
-  return { meta, languages, models, cells };
+  return { meta, languageAliases, languages, models, cells };
 }
 
 import { Derived } from './derive';

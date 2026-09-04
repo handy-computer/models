@@ -15,7 +15,7 @@ export interface Col<R> {
   tdClass?: (row: R) => string[];
 }
 
-export function makeTable<R extends { _partial?: boolean; _pick?: boolean }>(opts: {
+export function makeTable<R extends { _partial?: boolean; _pick?: boolean; _frontier?: boolean }>(opts: {
   cols: Col<R>[]; rows: R[]; defaultSort: string; defaultDesc?: boolean;
 }): HTMLElement {
   const { cols, rows, defaultSort, defaultDesc = false } = opts;
@@ -35,7 +35,7 @@ export function makeTable<R extends { _partial?: boolean; _pick?: boolean }>(opt
   thead.append(hr);
 
   for (const row of rows) {
-    const cls = [row._partial ? 'partial' : '', row._pick ? 'is-pick' : ''].filter(Boolean).join(' ');
+    const cls = [row._partial ? 'partial' : '', row._pick ? 'is-pick' : '', row._frontier ? 'is-frontier' : ''].filter(Boolean).join(' ');
     const tr = el('tr', { class: cls || null });
     for (const c of cols) {
       const sv = c.sortVal(row);

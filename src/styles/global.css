@@ -143,7 +143,7 @@ select, .btn {
 }
 
 select:focus-visible, .btn:focus-visible, .chip:focus-visible, .tabs a:focus-visible,
-th button:focus-visible {
+th button:focus-visible, .model-visibility-button:focus-visible {
   outline: 2.5px solid var(--series-2);
   outline-offset: 2px;
 }
@@ -396,6 +396,8 @@ select.wide[data-set], .combo.wide { width: min(100%, 900px); }
 .tile .v { font-family: var(--font-display); font-weight: 800; font-size: 1.45rem; }
 .tile .u { font-size: 0.85rem; color: var(--muted); font-weight: 600; }
 .tile .r { display: block; font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+.tile .v.text { font-size: 1.05rem; line-height: 1.9; }
+.quant-tiles { margin: 10px 0 6px; }
 
 /* the model page's sticker carries the card facts and the compare-with links too */
 .pick-meta { flex-basis: 100%; margin: 0; font-size: 0.9rem; color: var(--ink-2); }
@@ -503,9 +505,9 @@ table.data td.num, table.data th.num { text-align: right; font-variant-numeric: 
 table.data td.model-name { font-family: var(--font-mono); font-size: 0.84rem; white-space: nowrap; }
 table.data td.model-name .model-label { color: var(--ink); font-weight: 700; }
 table.data td.nowrap { white-space: nowrap; }
-/* the CI / rank after a value sits in a fixed-width box so the values
+/* the rank after a value sits in a fixed-width box so the values
    themselves line up down the column whatever the suffix's digit count */
-table.data td .ci, table.data td .rk {
+table.data td .rk {
   display: inline-block;
   text-align: right;
   color: var(--muted);
@@ -513,7 +515,18 @@ table.data td .ci, table.data td .rk {
   margin-left: 6px;
   font-variant-numeric: tabular-nums;
 }
-table.data td .ci { min-width: 11ch; }
+/* the change from the baseline after a quant's error */
+table.data td .d {
+  display: inline-block;
+  text-align: right;
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin-left: 6px;
+  min-width: 6ch;
+  font-variant-numeric: tabular-nums;
+}
+table.data td .d.above { color: var(--wine-deep); font-weight: 700; }
+.legend-swatch { width: 10px; height: 10px; border-radius: 3px; display: inline-block; flex: none; }
 table.data td .rk { min-width: 3ch; }
 table.data td.dim { color: var(--muted); }
 table.data td .trunc {
@@ -527,6 +540,72 @@ table.data td .trunc {
 table.data tr.partial td { color: var(--ink-2); }
 table.data td .err-main { font-weight: 700; }
 table.data tr:first-child td .rank-badge { background: var(--pink); }
+
+table.data td.model-visibility-cell { padding: 0; }
+.model-visibility-button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--ink-2);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.model-visibility-button:hover { color: var(--ink); background: var(--pink-light); }
+.model-visibility-button .caret { flex: none; transition: transform 120ms ease; }
+.model-visibility-button[aria-expanded="true"] .caret { transform: rotate(180deg); }
+
+/* English + language recommendation matrix */
+.recommendation-key { margin-bottom: 14px; }
+.recommendation-table { min-width: 1040px; }
+table.recommendation-table th:first-child { min-width: 190px; }
+table.recommendation-table th:not(:first-child) { width: 28%; }
+table.recommendation-table td { vertical-align: top; }
+table.recommendation-table th .th-sub {
+  display: block;
+  color: var(--ink-2);
+  font-weight: 500;
+  font-size: 0.74rem;
+  font-variant-numeric: tabular-nums;
+}
+.recommendation-language a { display: block; font-weight: 700; color: var(--ink); }
+.recommendation-language .badge { display: inline-block; margin-top: 4px; }
+.recommendation-err {
+  display: block;
+  margin-top: 2px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+.recommendation-pick { cursor: help; }
+/* experimental rows: no model under 20%; muted so the supported tier stands out */
+table.recommendation-table tr.is-experimental td { background: rgba(56, 39, 49, 0.035); }
+table.recommendation-table tr.is-experimental .recommendation-language a,
+table.recommendation-table tr.is-experimental .recommendation-model,
+table.recommendation-table tr.is-experimental .recommendation-err { color: var(--ink-2); }
+.recommendation-code, .recommendation-detail {
+  display: block;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+}
+.recommendation-code { font-family: var(--font-mono); }
+.recommendation-model {
+  display: block;
+  width: fit-content;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.recommendation-pick .badge { margin-top: 4px; }
+.recommendation-note { max-width: 100ch; }
 
 .rank-badge {
   display: inline-block;
@@ -560,6 +639,7 @@ svg.chart .baseline { stroke: var(--baseline); stroke-width: 1; }
 svg.chart .ref-line { stroke: var(--muted); stroke-width: 1; }
 svg.chart .ref-label { fill: var(--muted); font-size: 10px; }
 svg.chart .direct-label { fill: var(--ink); font-size: 10.5px; font-family: var(--font-mono); }
+svg.chart .leader { stroke: var(--baseline); stroke-width: 1; }
 svg.chart .bar-value { fill: var(--ink-2); font-size: 10.5px; font-variant-numeric: tabular-nums; }
 svg.chart .diff-value { font-weight: 700; }
 svg.chart .diff-vs { fill: var(--muted); }
@@ -570,6 +650,11 @@ svg.chart .zebra { fill: var(--cream); opacity: 0.55; }
 svg.chart .center { stroke: var(--ink-2); stroke-width: 1.2; }
 svg.chart .head-label { fill: var(--ink-2); font-size: 11px; font-weight: 600; }
 svg.chart .strip-empty { fill: none; stroke: var(--baseline); stroke-width: 1; }
+/* quantization strip: the typical-noise band, dots by standing against the CI */
+svg.chart .noise-band { fill: var(--baseline); opacity: 0.45; }
+svg.chart .strip-label { fill: var(--ink); font-size: 12px; font-weight: 700; font-family: var(--font-mono); }
+svg.chart .dot-worse { fill: var(--series-1); stroke: var(--surface); stroke-width: 1.5; }
+svg.chart .dot-noise { fill: var(--de-emph); stroke: var(--surface); stroke-width: 1.5; }
 
 /* Client-drawn charts keep their final footprint in the server HTML. This
    avoids a large layout jump (most visibly the homepage table moving down)
@@ -629,23 +714,13 @@ svg.chart .strip-empty { fill: none; stroke: var(--baseline); stroke-width: 1; }
 .tooltip .t-row .val { font-weight: 700; font-variant-numeric: tabular-nums; }
 .tooltip .t-row .lbl { color: #d9c8b8; }
 
-/* ---------- sections & footer ---------- */
+/* ---------- sections ---------- */
 
 .section-gap { height: 8px; }
 
-.claimed-note { margin: 14px 0 0; }
-.claimed-note summary { cursor: pointer; font-weight: 600; color: var(--ink-2); font-size: 0.9rem; }
-
-.site-footer {
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 18px 24px 40px;
-  border-top: 2px solid var(--ink);
-  color: var(--muted);
-  font-size: 0.82rem;
-}
-
-.site-footer code { font-family: var(--font-mono); font-size: 0.78rem; }
+.claimed-note, .more { margin: 14px 0 0; }
+.claimed-note summary, .more summary { cursor: pointer; font-weight: 600; color: var(--ink-2); font-size: 0.9rem; }
+.more .table-wrap { margin-top: 8px; }
 
 /* ---------- responsive ---------- */
 
@@ -655,7 +730,7 @@ svg.chart .strip-empty { fill: none; stroke: var(--baseline); stroke-width: 1; }
   .wordmark { gap: 0.5em; }
   .wordmark-text { top: -1px; }
   .handy-hand { height: 3.1rem; }
-  main, .site-header, .site-footer { padding-left: 14px; padding-right: 14px; }
+  main, .site-header { padding-left: 14px; padding-right: 14px; }
   .pick-card { gap: 12px 20px; }
   .pick-model { font-size: 1.15rem; }
   :root { --combo-w: 100%; }
@@ -671,6 +746,18 @@ tr.is-pick td { background: rgba(250, 162, 202, 0.16); }
 table.data tbody tr.is-pick:hover td { background: rgba(250, 162, 202, 0.3); }
 
 .model-cell { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+/* rows on the chart's pareto frontier (Handy GPU rig) share the picks'
+   pink wash; the pick tags tell the two apart and the key above the table
+   says what the wash means */
+tr.is-frontier td { background: rgba(250, 162, 202, 0.16); }
+table.data tbody tr.is-frontier:hover td { background: rgba(250, 162, 202, 0.3); }
+.table-key { margin: 10px 2px 8px; }
+.table-key .swatch { background: rgba(250, 162, 202, 0.45); border: 1px solid var(--baseline); }
+.table-key-toggle { margin-left: auto; cursor: pointer; gap: 4px; }
+.table-key-toggle input { margin: 0; accent-color: var(--wine-deep); }
+/* the toggle hides every unhighlighted row; the set view's disclosure row stays */
+.table-key:has(.table-key-toggle input:checked) + .table-wrap table.data > tbody:not(.model-visibility-controls) > tr:not(.is-pick):not(.is-frontier) { display: none; }
 
 .pick-tag {
   display: inline-block;

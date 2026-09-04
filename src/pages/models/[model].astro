@@ -1,7 +1,8 @@
 ---
 /* The "models" view for one model: a verdict against the field, its standing
-   per language against the best other model, speed on the AMD Ryzen 4750U,
-   and the card facts. Rendered here for the default state (every language);
+   per language against the best other model, how its lower quantizations
+   compare with the Q8_0 baseline, speed on the AMD Ryzen 4750U, and the card
+   facts. Rendered here for the default state (every language);
    src/scripts/modelpage.ts draws the charts and re-renders what depends on
    the language focus (?langs=de,fr). */
 import Layout from '../../layouts/Layout.astro';
@@ -10,9 +11,10 @@ import ModelSelect from '../../components/ModelSelect.astro';
 import LanguageFilter from '../../components/LanguageFilter.astro';
 import { loadDerived } from '../../lib/db';
 import { pageTitle, MODEL_RIGS } from '../../lib/config';
-import { fmtX, fmtGB } from '../../lib/format';
+import { fmtX, fmtGB, fmtErr, fmtSigned, fmtPct } from '../../lib/format';
 import { jsonForScript } from '../../lib/json';
 import { standingRows, verdict, speedTable, compareSuggestions } from '../../lib/standing';
+import { BASE_QUANT, QUANT_USABLE_MAX, quantsTested, quantRows, quantSizes, quantSummaries, quantVerdict, quantStripHeight } from '../../lib/quant';
 
 export function getStaticPaths() {
   return loadDerived().modelNames.map(m => ({ params: { model: m } }));
@@ -32,7 +34,20 @@ const frontier0 = rows.filter(r => r.frontier[rig0.id]).length;
 const suggestions = compareSuggestions(d, model);
 const compareHref = (other: string) => `/models?set=${encodeURIComponent(model)},${encodeURIComponent(other)}`;
 
-const payload = { model, rows, speeds, rigs: MODEL_RIGS };
+/* quantization: the lower quants against the Q8_0 baseline */
+const qs = quantsTested(d, model);
+const qrows = quantRows(d, model, qs);
+const usableRows = qrows.filter(r => r.usable);
+const hiddenRows = qrows.filter(r => !r.usable);
+const sizes = quantSizes(d, model, qs);
+const qsum = quantSummaries(qrows, qs, sizes);
+const sizeTip: Record<string, [string, string][]> = {};
+for (const s of qsum) {
+  if (s.size_gb != null) sizeTip[s.quant] = [['file', `${fmtGB(s.size_gb)}${s.sizeFrac != null ? ` · ${Math.round(100 * s.sizeFrac)}% of ${BASE_QUANT}` : ''}`]];
+}
+const quantPayload = qs.length ? { base: BASE_QUANT, quants: qs, rows: qrows, sizes, sizeTip } : null;
+
+const payload = { model, rows, speeds, rigs: MODEL_RIGS, quant: quantPayload };
 ---
 <Layout view="models" title={pageTitle(model)}
   description={`${model} on the Handy speech-to-text benchmarks: accuracy per language against the best other model, speed on Handy's target hardware, size, license and capabilities.`}>
@@ -74,6 +89,74 @@ const payload = { model, rows, speeds, rigs: MODEL_RIGS };
     </div>
     <div id="standing-chart" class="chart-mount" style={`--chart-aspect: 860 / ${56 + rows.length * 24}`}></div>
   </div>
+
+  {qs.length > 0 && (
+    <div class="card chart-card">
+      <p class="chart-title" id="quant-title">quantization · {usableRows.length} usable {usableRows.length === 1 ? 'language' : 'languages'} at {qs.join(', ')}</p>
+      <p class="chart-sub" id="quant-verdict">{qsum.map(quantVerdict).join(' ')}</p>
+      <div id="quant-tiles">
+        {qsum.map(s => (
+          <div class="tile-row quant-tiles">
+            <div class="tile"><span class="k">{s.quant} file</span><span class="v">{s.sizeFrac != null ? `${Math.round(100 * s.sizeFrac)}%` : '—'} <span class="u">of {BASE_QUANT}</span></span><span class="r">{fmtGB(s.size_gb)} against {fmtGB(sizes[BASE_QUANT])}</span></div>
+            <div class="tile"><span class="k">median error change</span><span class="v">{fmtPct(s.medianRel)}</span><span class="r">over {s.n} usable {s.n === 1 ? 'language' : 'languages'}</span></div>
+            <div class="tile"><span class="k">measurably worse</span><span class="v">{s.above} <span class="u">of {s.n}</span></span><span class="r">above the {BASE_QUANT} 95% confidence interval</span></div>
+            <div class="tile"><span class="k">worst usable language</span><span class="v text">{s.worst ? s.worst.name : '—'}</span><span class="r">{s.worst ? `${fmtErr(s.worst.base)} → ${fmtErr(s.worst.err)} (${fmtSigned(s.worst.delta)} pts)` : 'no result'}</span></div>
+          </div>
+        ))}
+      </div>
+      <div class="legend">
+        <span class="key"><span class="dot" style="background:var(--series-1)"></span>measurably worse than {BASE_QUANT}: above its 95% confidence interval</span>
+        <span class="key"><span class="dot" style="background:var(--de-emph)"></span>within noise</span>
+        <span class="key"><span class="swatch" style="background:var(--baseline);opacity:.45"></span>typical noise of one measurement</span>
+      </div>
+      <div id="quant-chart" class="chart-mount" style={`--chart-aspect: 860 / ${quantStripHeight(qs.length)}`}></div>
+
+      <details class="more">
+        <summary>per-language numbers ({usableRows.length}{hiddenRows.length > 0 ? ` usable, ${hiddenRows.length} more at ${QUANT_USABLE_MAX}% or worse` : ''})</summary>
+        <div class="table-wrap">
+          <table class="data" data-sortable data-default-sort="worst" data-default-desc="true">
+            <thead>
+              <tr>
+                <th data-key="lang"><button type="button">language</button></th>
+                <th class="num" data-key="base"><button type="button">{BASE_QUANT} % (95% CI)</button></th>
+                {qs.map(q => (
+                  <th class="num" data-key={q} title="error at this quant, and the change from the baseline in points"><button type="button">{q} % (Δ)</button></th>
+                ))}
+                <th class="num" data-key="worst" title="the largest relative drift over the quants"><button type="button">worst drift</button></th>
+              </tr>
+            </thead>
+            <tbody>
+              {qrows.map(r => (
+                <tr class={r.usable ? undefined : 'quant-unusable'} hidden={!r.usable}>
+                  <td data-sort={r.name}>{r.name}</td>
+                  <td class="num" data-sort={r.base.err}><span class="err-main">{fmtErr(r.base.err)}</span><span class="ci">{r.base.lo != null && `${fmtErr(r.base.lo)}–${fmtErr(r.base.hi)}`}</span></td>
+                  {qs.map(q => {
+                    const c = r.cells[q];
+                    return c
+                      ? <td class="num" data-sort={c.err}><span class="err-main">{fmtErr(c.err)}</span><span class={c.vsCi === 'above' ? 'd above' : 'd'}>{fmtSigned(c.delta)}</span></td>
+                      : <td class="num dim" data-sort="">—</td>;
+                  })}
+                  <td class="num" data-sort={r.worstRel}>{fmtPct(r.worstRel)}</td>
+                </tr>
+              ))}
+            </tbody>
+            {hiddenRows.length > 0 && (
+              <tbody class="model-visibility-controls">
+                <tr><td class="model-visibility-cell" colspan={3 + qs.length}>
+                  <button type="button" class="model-visibility-button" id="quant-unusable-toggle" aria-expanded="false"
+                    data-show={`Show ${hiddenRows.length} ${hiddenRows.length === 1 ? 'language' : 'languages'} at ${QUANT_USABLE_MAX}% or worse ${BASE_QUANT} error`}
+                    data-hide={`Hide ${hiddenRows.length} ${hiddenRows.length === 1 ? 'language' : 'languages'} at ${QUANT_USABLE_MAX}% or worse ${BASE_QUANT} error`}>
+                    <svg class="caret" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span>Show {hiddenRows.length} {hiddenRows.length === 1 ? 'language' : 'languages'} at {QUANT_USABLE_MAX}% or worse {BASE_QUANT} error</span>
+                  </button>
+                </td></tr>
+              </tbody>
+            )}
+          </table>
+        </div>
+      </details>
+    </div>
+  )}
 
   <div class="card chart-card">
     <p class="chart-title">speed · all {d.modelNames.length} models on the <span id="strip-rig">{rig0.short}</span></p>

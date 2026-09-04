@@ -8,6 +8,9 @@ import Scatter from './Scatter.astro';
 import ClaimedOnlyLanguage from './ClaimedOnlyLanguage.astro';
 import PickTags from './PickTags.astro';
 import AutoDetectBadge from './AutoDetectBadge.astro';
+import { recommendModels, RECOMMENDATION } from '../lib/recommendation';
+import { paretoFrontier } from '../lib/frontier';
+import { RIGS } from '../lib/config';
 
 interface Props { d: Derived; lang: string }
 const { d, lang } = Astro.props;
@@ -18,8 +21,16 @@ const metricName = d.metricLabel(lang);
 const cells = d.cellsForLang(lang).sort((a, b) => a.err - b.err);
 
 /* three picks: overall / most accurate / fast, tagged in the table */
-const picks = d.pickThree(cells.map(c => ({ model: c.model, err: c.err })));
+const picks = recommendModels(d, [lang]);
 const isPick = (m: string) => [picks.overall, picks.accurate, picks.fast].some(p => p?.model === m);
+
+/* frontier rows in the table: the chart's default rig (the Handy GPU) and
+   the chart's error cutoff, so the marks match the chart on first paint */
+const frontierRig = RIGS[0];
+const frontier = paretoFrontier(cells
+  .filter(c => c.err < RECOMMENDATION.maxError)
+  .flatMap(c => { const x = d.perfOf(c.model, frontierRig.id); return x == null ? [] : [{ id: c.model, x, y: c.err }]; }));
+const rowClass = (m: string) => [isPick(m) ? 'is-pick' : '', frontier.has(m) ? 'is-frontier' : ''].filter(Boolean).join(' ') || undefined;
 
 const rows = cells.map((c, i) => ({ ...c, rank: i + 1, m: d.model(c.model) }));
 
@@ -48,15 +59,25 @@ const s = (v: number | string | null | undefined) => v == null ? '' : String(v);
   <ClaimedOnlyLanguage d={d} lang={lang} />
 ) : (
   <Fragment>
+    {picks.reason === 'error-too-high' && (
+      <p class="hint">No supported recommendation: the lowest error is at least 30% and its 95% confidence interval does not overlap 30%.</p>
+    )}
+    {picks.status === 'experimental' && (
+      <p class="hint">Experimental recommendation: no model is below 20% error for this language.</p>
+    )}
     <Scatter payload={scatterPayload} />
 
+    <div class="legend table-key">
+      <span class="key"><span class="swatch"></span>highlighted rows are recommended picks or on pareto frontier</span>
+      <label class="key table-key-toggle"><input type="checkbox" /> only highlighted rows</label>
+    </div>
     <div class="table-wrap">
       <table class="data" data-sortable data-default-sort="err" data-default-desc="false">
         <thead>
           <tr>
             <th class="num" data-key="rank"><button type="button">#</button></th>
             <th data-key="model"><button type="button">model</button></th>
-            <th class="num" data-key="err"><button type="button">{metricName} % (95% CI)</button></th>
+            <th class="num" data-key="err"><button type="button">{metricName} %</button></th>
             <th class="num" data-key="rgpu" title="Vulkan, × realtime"><button type="button">AMD 4750U GPU</button></th>
             <th class="num" data-key="rcpu" title="× realtime"><button type="button">AMD 4750U CPU</button></th>
             <th class="num" data-key="size" title={`${quant} GGUF size`}><button type="button">size</button></th>
@@ -65,7 +86,7 @@ const s = (v: number | string | null | undefined) => v == null ? '' : String(v);
         </thead>
         <tbody>
           {rows.map(r => (
-            <tr class={isPick(r.model) ? 'is-pick' : undefined}>
+            <tr class={rowClass(r.model)}>
               <td class="num" data-sort={r.rank}><span class="rank-badge">{r.rank}</span></td>
               <td class="model-name" data-sort={r.model}><span class="model-cell"><span class="model-label">{r.model}</span><AutoDetectBadge d={d} model={r.model} /><PickTags picks={picks} model={r.model} /></span></td>
               <td class="num" data-sort={r.err}><ErrCell cell={r} /></td>

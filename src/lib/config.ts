@@ -56,16 +56,3 @@ export const MODEL_RIGS: Rig[] = RIGS.filter(r => r.rig === 'ryzen-4750u');
 
 /** localStorage key for the visitor's rig, shared by every page with a rig picker */
 export const RIG_PREF_KEY = 'handy-models.rig';
-
-/* Pick scoring (see README "Picks"). Score = error + k × seconds waited after a
-   dictation of `dictationS` seconds. `fast` uses fastK. Streaming models are
-   treated as waiting streamWaitS as long as they keep up with realtime. */
-export const SCORE = {
-  k: 2,
-  fastK: 6,
-  dictationS: 10,
-  streamWaitS: 0.3,
-  accurateMaxWaitS: 5,
-};
-/** rig the picks are scored on: a modest laptop GPU */
-export const PICK_RIG = 'r-gpu';

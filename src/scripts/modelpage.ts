@@ -5,31 +5,50 @@
    the first models-tab rig (the GPU); the verdict sentence covers both.
 
    DOM contract:
-     #modelpage-data           JSON { model, rows: StandingRow[], speeds, rigs }
+     #modelpage-data           JSON { model, rows: StandingRow[], speeds, rigs, quant }
      select[data-set="filter"] the language focus; enhanced here, state in ?langs=
      #verdict                  the verdict sentences
      #frontier-stat            .k / .v of the frontier count
      #standing-title           chart title (carries the language count)
      #standing-chart           host for the difference chart
+     #quant-title, #quant-verdict, #quant-tiles, #quant-chart
+                               title, verdict sentence, headline tiles and host
+                               for the quantization strip (absent when the
+                               model has no lower quants)
+     #quant-unusable-toggle    shows / hides the unusable rows of the per-language table
      #strip-rig, #speed-strip  rig name in the speed card title, host for the strip */
 
 import type { Rig } from '../lib/config';
 import type { StandingRow, SpeedRow } from '../lib/standing';
+import { BASE_QUANT, quantSummaries, quantVerdict, type QuantRow, type QuantSummary } from '../lib/quant';
 import { verdict } from '../lib/standing';
 import { parseList, withLangs } from '../lib/routes';
 import { seriesColor } from '../lib/palette';
-import { fmtErr } from '../lib/format';
+import { fmtErr, fmtGB, fmtPct, fmtSigned } from '../lib/format';
 import type { TipRows } from './tooltip';
 import { el } from './dom';
 import { enhanceCombobox, type Combobox } from './combobox';
 import { diffChart, type DiffRow } from './diff';
+import { quantStrip } from './quantchart';
 import { speedStrip } from './speedstrip';
+
+interface QuantPayload {
+  base: string;
+  quants: string[];
+  /** every language, worst drift first */
+  rows: QuantRow[];
+  /** quant -> file size, the baseline included */
+  sizes: Record<string, number | null>;
+  /** quant -> tooltip rows about the file */
+  sizeTip: Record<string, TipRows>;
+}
 
 interface Payload {
   model: string;
   rows: StandingRow[];
   speeds: Record<string, SpeedRow>;
   rigs: Rig[];
+  quant: QuantPayload | null;
 }
 
 export function initModelPage(): void {
@@ -38,7 +57,18 @@ export function initModelPage(): void {
   const P = JSON.parse(dataEl.textContent || '{}') as Payload;
   const $ = (id: string) => document.getElementById(id);
   const verdictEl = $('verdict'), frontierEl = $('frontier-stat'), titleEl = $('standing-title'),
-    chartEl = $('standing-chart'), stripEl = $('speed-strip'), stripRigEl = $('strip-rig');
+    chartEl = $('standing-chart'), stripEl = $('speed-strip'), stripRigEl = $('strip-rig'),
+    quantTitleEl = $('quant-title'), quantVerdictEl = $('quant-verdict'), quantTilesEl = $('quant-tiles'), quantEl = $('quant-chart');
+
+  // the per-language table's unusable rows, behind a disclosure row
+  const unusableToggle = $('quant-unusable-toggle');
+  unusableToggle?.addEventListener('click', () => {
+    const open = unusableToggle.getAttribute('aria-expanded') !== 'true';
+    unusableToggle.setAttribute('aria-expanded', String(open));
+    const label = unusableToggle.querySelector('span');
+    if (label) label.textContent = open ? unusableToggle.dataset.hide ?? '' : unusableToggle.dataset.show ?? '';
+    for (const tr of document.querySelectorAll<HTMLElement>('tr.quant-unusable')) tr.hidden = !open;
+  });
   const langSel = document.querySelector<HTMLSelectElement>('select[data-set="filter"]');
   const rigInfo = P.rigs[0], rig = rigInfo.id;
   const readLangs = () => parseList(new URLSearchParams(location.search), 'langs');
@@ -65,6 +95,46 @@ export function initModelPage(): void {
     const k = frontierEl.querySelector('.k'), v = frontierEl.querySelector('.v');
     if (k) k.textContent = `frontier · ${rigInfo.short}`;
     if (v) v.textContent = `${rows.filter(x => x.frontier[rig]).length} of ${rows.length}`;
+  }
+
+  /** the headline tiles for one quant, the same four the page renders */
+  function quantTiles(s: QuantSummary, sizes: Record<string, number | null>): HTMLElement {
+    const tile = (k: string, v: (string | Node)[], r: string) =>
+      el('div', { class: 'tile' }, el('span', { class: 'k', text: k }), el('span', { class: 'v' }, ...v), el('span', { class: 'r', text: r }));
+    const langsText = `${s.n} usable ${s.n === 1 ? 'language' : 'languages'}`;
+    const row = el('div', { class: 'tile-row quant-tiles' },
+      tile(`${s.quant} file`, [s.sizeFrac != null ? `${Math.round(100 * s.sizeFrac)}% ` : '— ', el('span', { class: 'u', text: `of ${BASE_QUANT}` })],
+        `${fmtGB(s.size_gb)} against ${fmtGB(sizes[BASE_QUANT])}`),
+      tile('median error change', [fmtPct(s.medianRel)], `over ${langsText}`),
+      tile('measurably worse', [`${s.above} `, el('span', { class: 'u', text: `of ${s.n}` })], `above the ${BASE_QUANT} 95% confidence interval`),
+      tile('worst usable language', [s.worst ? s.worst.name : '—'],
+        s.worst ? `${fmtErr(s.worst.base)} → ${fmtErr(s.worst.err)} (${fmtSigned(s.worst.delta)} pts)` : 'no result'));
+    const worstV = row.querySelectorAll('.v')[3];
+    worstV?.classList.add('text');
+    return row;
+  }
+
+  function renderQuant(): void {
+    const Q = P.quant;
+    if (!Q || !quantEl) return;
+    const rows = langs.length ? Q.rows.filter(r => langs.includes(r.lang)) : Q.rows;
+    const usable = rows.filter(r => r.usable);
+    const summaries = quantSummaries(usable, Q.quants, Q.sizes);
+    if (quantTitleEl) {
+      const at = `at ${Q.quants.join(', ')}`;
+      quantTitleEl.textContent = langs.length
+        ? `quantization · ${usable.length} usable of the ${langs.length} chosen ${at}`
+        : `quantization · ${usable.length} usable ${usable.length === 1 ? 'language' : 'languages'} ${at}`;
+    }
+    if (quantVerdictEl) quantVerdictEl.textContent = summaries.map(quantVerdict).join(' ');
+    if (quantTilesEl) quantTilesEl.replaceChildren(...summaries.map(s => quantTiles(s, Q.sizes)));
+    quantEl.replaceChildren(usable.length
+      ? quantStrip({
+          rows: usable, quants: Q.quants, summaries, baseQuant: Q.base,
+          extraTip: Q.sizeTip,
+          ariaLabel: `${P.model}: error change at ${Q.quants.join(', ')} against ${Q.base}, per usable language`,
+        })
+      : el('p', { class: 'hint', text: langs.length ? 'No usable quantization results for this model in the chosen languages.' : 'No usable quantization results for this model.' }));
   }
 
   function renderLangs(): void {
@@ -109,6 +179,7 @@ export function initModelPage(): void {
           })
         : el('p', { class: 'hint', text: langs.length ? 'No benchmark for this model in the chosen languages.' : 'No benchmark for this model yet.' }));
     }
+    renderQuant();
     renderFrontier(rows);
   }
 

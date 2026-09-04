@@ -1,7 +1,8 @@
 /* DOM versions of PickTags.astro and AutoDetectBadge.astro for the set island. */
 
-import type { Derived, Picks } from '../lib/derive';
-import { pickTagsFor } from '../lib/derive';
+import type { Derived } from '../lib/derive';
+import type { Picks } from '../lib/recommendation';
+import { pickTagsFor } from '../lib/recommendation';
 import { el } from './dom';
 import { attachTip, tipShow } from './tooltip';
 

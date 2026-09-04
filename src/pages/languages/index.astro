@@ -8,13 +8,14 @@ import LanguageSelect from '../../components/LanguageSelect.astro';
 import { loadDerived } from '../../lib/db';
 import { pageTitle } from '../../lib/config';
 import { jsonForScript } from '../../lib/json';
+import { RECOMMENDATION } from '../../lib/recommendation';
 
 const d = loadDerived();
 ---
 <Layout view="languages" title={pageTitle('compare languages')}
-  description="Best speech-to-text model across a set of languages: the models covering every language in the set, ranked by their combined error rate, with a top pick.">
+  description="Compare speech-to-text models that cover a complete language set, with per-language error rates and overall, fast, and accurate recommendations.">
   <h2 class="view-title">best model across languages</h2>
-  <p class="view-sub">Models covering every language in the set, ranked by the geometric mean of their error at {d.quant} — lower is better. Speed is × realtime on Handy target hardware.</p>
+  <p class="view-sub">Only models covering every selected language are included, ranked by the geometric mean of their error at {d.quant} — lower is better. Models at {RECOMMENDATION.experimentalMaxError}% or worse on any language are hidden from both chart and table by default and can be shown from the table’s final row.</p>
 
   <LanguageSelect d={d} set={[]} island />
 

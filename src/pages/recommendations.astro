@@ -1,0 +1,118 @@
+---
+/* At-a-glance recommendations for English and every English-language pair.
+   English is pinned first; the pairs follow sorted by the overall pick's
+   score. Each pick cell leads with one number, the pick's error on its
+   worst language (the quality gate), and keeps the rest in the tooltip. */
+import Layout from '../layouts/Layout.astro';
+import { loadDerived } from '../lib/db';
+import { pageTitle } from '../lib/config';
+import { fmtErr } from '../lib/format';
+import { jsonForScript } from '../lib/json';
+import { recommendModels, RECOMMENDATION, type PickKey, type RecommendedModel } from '../lib/recommendation';
+
+const d = loadDerived();
+const languageCodes = new Set(
+  [...d.testedLangs, ...d.claimedOnlyLangs]
+    .map(lang => d.canonicalLanguage(lang.code)),
+);
+const languages = [...languageCodes].map(code => ({ code, ...d.lang(code)! }));
+const scored = languages.map(lang => {
+  const codes = lang.code === 'en' ? ['en'] : ['en', lang.code];
+  return { lang, codes, picks: recommendModels(d, codes) };
+}).filter(row =>
+  (row.picks.status === 'supported' || row.picks.status === 'experimental') &&
+  row.picks.overall != null &&
+  row.picks.fast != null &&
+  row.picks.accurate != null
+);
+const english = scored.filter(row => row.lang.code === 'en');
+const pairs = scored.filter(row => row.lang.code !== 'en').sort((a, b) =>
+  a.picks.overall!.score! - b.picks.overall!.score! ||
+  a.picks.overall!.worstErr - b.picks.overall!.worstErr ||
+  a.lang.name.localeCompare(b.lang.name)
+);
+const rows = [...english, ...pairs];
+const experimentalCount = rows.filter(row => row.picks.status === 'experimental').length;
+
+interface Column { key: PickKey; label: string; hardware: 'GPU' | 'CPU'; wait: 'gpuWait' | 'cpuWait'; maxWait: number; rule: string }
+const columns: Column[] = [
+  { key: 'overall', label: 'overall', hardware: 'GPU', wait: 'gpuWait', maxWait: RECOMMENDATION.overallMaxWaitS, rule: 'accuracy/speed balance' },
+  { key: 'fast', label: 'fast', hardware: 'CPU', wait: 'cpuWait', maxWait: RECOMMENDATION.fastMaxWaitS, rule: 'most accurate' },
+  { key: 'accurate', label: 'accurate', hardware: 'GPU', wait: 'gpuWait', maxWait: RECOMMENDATION.accurateMaxWaitS, rule: 'most accurate' },
+];
+const target = (c: Column) => `≤${c.maxWait}s ${c.hardware}`;
+
+/* the tooltip carries everything the cell used to spell out */
+const tipFor = (column: Column, pick: RecommendedModel, pair: boolean) => {
+  const wait = pick[column.wait];
+  const r: [string, string][] = [];
+  if (pair) {
+    r.push(['worst language', `${d.langName(pick.worstLanguage)} · ${fmtErr(pick.worstErr)}%`]);
+    r.push(['combined error', `${fmtErr(pick.err)}%`]);
+  } else {
+    r.push(['error', `${fmtErr(pick.err)}%`]);
+  }
+  r.push([`${column.hardware} wait`, wait == null ? 'unknown' : `${wait.toFixed(1)}s`]);
+  if (column.key === 'overall' && pick.score != null) r.push(['score', pick.score.toFixed(2)]);
+  return jsonForScript({ t: pick.model, r });
+};
+---
+<Layout view="recommendations" title={pageTitle('recommendations')}
+  description="Speech-to-text model recommendations for English-language pairs, using the same quality-first policy as pi-transcribe.">
+  <h2 class="view-title">recommended models with English</h2>
+  <p class="view-sub">English first, then {pairs.length} English-language pairs sorted by the overall pick’s accuracy/speed score, best first. Each cell shows the pick’s error on its worst language; hover for the combined error, wait and score. {experimentalCount} rows are experimental.</p>
+
+  <div class="legend recommendation-key" aria-label="Recommendation rules">
+    {columns.map(column => (
+      <span class="key"><span class="badge">{column.label}</span> {column.rule} within the wait target on the 4750U {column.hardware}</span>
+    ))}
+  </div>
+
+  <div class="table-wrap">
+    <table class="data recommendation-table">
+      <thead>
+        <tr>
+          <th>languages</th>
+          {columns.map(column => (
+            <th title={`${column.rule} within a ${column.maxWait}s wait on the AMD Ryzen 4750U ${column.hardware}`}>
+              {column.label}<span class="th-sub">{target(column)}</span>
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map(({ lang, codes, picks }) => {
+          const pair = lang.code !== 'en';
+          return (
+            <tr class={picks.status === 'experimental' ? 'is-experimental' : undefined}>
+              <td class="recommendation-language">
+                {pair ? (
+                  <a href={`/languages?set=${codes.join(',')}`}>English + {lang.name}</a>
+                ) : (
+                  <a href="/languages/en">English</a>
+                )}
+                <span class="recommendation-code">{pair ? `en + ${lang.code}` : 'en'}</span>
+                {picks.status === 'experimental' && <span class="badge off">experimental</span>}
+                {picks.manualSwitch && <span class="badge off">manual language switch</span>}
+              </td>
+              {columns.map(column => {
+                const pick = picks[column.key]!;
+                const wait = pick[column.wait];
+                return (
+                  <td class="recommendation-pick" tabindex="0" data-tip={tipFor(column, pick, pair)}>
+                    <a class="recommendation-model" href={`/models/${encodeURIComponent(pick.model)}`}>{pick.model}</a>
+                    <span class="recommendation-err">{fmtErr(pick.worstErr)}%</span>
+                    <span class="recommendation-detail">{wait == null ? `${column.hardware} time unknown` : `${wait.toFixed(1)}s ${column.hardware} wait`}</span>
+                    {wait != null && wait > column.maxWait && <span class="badge off">over {column.maxWait}s target</span>}
+                  </td>
+                );
+              })}
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
+
+  <p class="hint recommendation-note">A 30-second dictation defines wait time: wait = 30 ÷ × realtime. Quality is a hard constraint whenever a model stays below 20% on every language; time targets relax first. Experimental rows have no sub-20% model but remain below 30%, or have a 95% confidence interval whose lower bound reaches 30%. Unbenchmarked and conclusively 30%+ pairs are omitted.</p>
+</Layout>

@@ -48,6 +48,8 @@ export interface Cell {
 
 export interface Dataset {
   meta: Record<string, string>;
+  /** Raw model-card code -> benchmark language identity. */
+  languageAliases: Record<string, string>;
   languages: Record<string, LangInfo>;
   models: Record<string, ModelInfo>;
   cells: Cell[];
