@@ -903,8 +903,8 @@
       "repository": "handy-computer/multitalker-parakeet-streaming-0.6b-v1-gguf",
       "revision": "a9a7208d8f205b5816770a6f7fb83afc81a7691b",
       "previousRevisions": [
-        "0314bc0d2f4be9a0d79fa5eeb36ad1f3962cfcbb",
-        "31042fb4b5018be38240018492bdbde1923789dc"
+        "31042fb4b5018be38240018492bdbde1923789dc",
+        "0314bc0d2f4be9a0d79fa5eeb36ad1f3962cfcbb"
       ],
       "license": "other",
       "family": "parakeet",
