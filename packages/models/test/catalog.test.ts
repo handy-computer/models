@@ -8,6 +8,7 @@ import {
   compareEngineVersions,
   CURATED_MODELS,
   LANGUAGE_DETECTION_MODEL,
+  modelFile,
   modelsForEngine,
 } from "../src/index.ts";
 
@@ -21,7 +22,7 @@ test("every download is pinned and hashed, and the default file is one of them",
   for (const model of ALL_MODELS) {
     assert.match(model.revision, /^[0-9a-f]{40}$/, model.id);
     assert.match(model.repository, /^handy-computer\/.+-gguf$/, model.id);
-    assert.ok(model.files[model.quant], model.id);
+    assert.equal(modelFile(model), model.files[model.quant], model.id);
     for (const file of Object.values(model.files)) {
       assert.match(file.sha256, /^[0-9a-f]{64}$/, `${model.id} ${file.filename}`);
       assert.ok(file.size > 0);

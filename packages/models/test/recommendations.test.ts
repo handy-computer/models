@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   accuracyGrade,
+  benchmarkModels,
   catalog,
   compareEngineVersions,
   CURATED_MODELS,
@@ -66,6 +67,10 @@ test("fallback statuses and preferred-language visibility follow the methodology
   const unmeasured = { ...CURATED_MODELS[0]!, id: "unmeasured" };
   assert.equal(recommendModels([unmeasured], ["en"])[0]?.status, "unbenchmarked");
   assert.deepEqual(recommendModels([], ["en"]), []);
+  assert.deepEqual(recommend([]), [], "no languages, no picks");
+  assert.deepEqual(benchmarkModels(CURATED_MODELS, []), new Map());
+  assert.deepEqual(recommend(["xx"]), [], "a language no model speaks gets no picks");
+  assert.deepEqual(recommend(["en", "xx"]), []);
 });
 
 test("recommend() only picks curated models the engine can load", () => {

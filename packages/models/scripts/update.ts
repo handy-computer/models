@@ -1,25 +1,26 @@
 // The daily update. Moves curation.yaml to the newest transcribe.cpp release,
 // refreshes pins, regenerates catalog.json and the picks snapshot, bumps the
-// package version, and writes a plain-words summary. It decides whether the
-// change can land on its own or needs a person:
+// patch version, and writes a plain-words summary for the PR it goes out in.
+// Every change is a PR; the summary leads with what needs a closer look:
 //
-//   lands on its own   new published models, benchmark numbers that move no
-//                      pick, changes to models that aren't curated
 //   needs review       any pick changes, or a curated model's (or the language
 //                      detector's) download, licence, languages, capabilities
 //                      or minimum engine changes, or a curated model disappears
+//   needs a name       published models missing from `names` in curation.yaml
+//   not yet public     models left out because their Hugging Face repo is private
 //
 //   node scripts/update.ts [--transcribe-cpp <path>] [--summary <file>] [--candidates <file>]
 //
 // --candidates writes a JSON list of new models that would be picked if
 // curated ({ id, title, body }), so CI can open one issue per candidate.
-// Writes changed/review/title to $GITHUB_OUTPUT when set. Does not commit.
+// Writes changed/title to $GITHUB_OUTPUT when set. Does not commit.
 
 import { execFileSync } from "node:child_process";
 import { appendFileSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { parse as parseYaml } from "yaml";
 import { createCatalog } from "../src/create.ts";
 import { compareEngineVersions } from "../src/catalog.ts";
 import { languageIdentity } from "../src/languages.ts";
@@ -64,7 +65,8 @@ if (compareEngineVersions(latest, current) > 0) {
 }
 
 // Pins only move for files that changed; then rebuild everything from them.
-// The bot's own pushes skip the check job, so guard the pin history here.
+// The bot's PRs (opened with GITHUB_TOKEN) skip the check job, so guard the
+// pin history here.
 const basePins = join(mkdtempSync(join(tmpdir(), "models-")), "pins.json");
 writeFileSync(basePins, before["pins.json"]!);
 run("node", ["scripts/generate.mjs", "--update-pins", "--transcribe-cpp", transcribeCpp, "--pins-base", basePins]);
@@ -83,7 +85,7 @@ writeFileSync(file("test/fixtures/picks.json"), `${JSON.stringify(newPicks, null
 
 const changedFiles = tracked.filter((name) => read(name) !== before[name]);
 if (changedFiles.length === 0) {
-  output({ changed: "false", review: "false", title: "" });
+  output({ changed: "false", title: "" });
   if (candidatesPath) writeFileSync(candidatesPath, "[]\n");
   console.log("Nothing changed.");
   process.exit(0);
@@ -200,6 +202,17 @@ if (added.length) {
   }
   lines.push("");
 }
+const names: Record<string, string> = parseYaml(read("curation.yaml")).names ?? {};
+const unnamed = newCatalog.models.filter((model) => !(model.id in names));
+if (unnamed.length) {
+  lines.push("### Needs a name", "", "These use a name tidied from the id. Add them to `names` in `curation.yaml`:", "");
+  lines.push("```yaml", ...unnamed.map((model) => `  ${model.id}: ${model.name}`), "```", "");
+}
+const pins: Record<string, { private?: boolean }> = JSON.parse(read("pins.json"));
+const notPublic = Object.keys(pins).filter((id) => pins[id]!.private);
+if (notPublic.length) {
+  lines.push("### Not yet public", "", `Left out until their Hugging Face repo is public: ${notPublic.join(", ")}.`, "");
+}
 const other: string[] = [];
 if (curatedResultChanges.length) {
   const effect = pickChanges.length ? "" : " without changing a pick";
@@ -214,7 +227,7 @@ const summary = `${lines.join("\n")}\n`;
 if (summaryPath) writeFileSync(summaryPath, summary);
 if (candidatesPath) writeFileSync(candidatesPath, `${JSON.stringify(candidates, null, 2)}\n`);
 console.log(summary);
-output({ changed: "true", review: String(review), title });
+output({ changed: "true", title });
 
 function output(values: Record<string, string>) {
   if (!process.env.GITHUB_OUTPUT) return;

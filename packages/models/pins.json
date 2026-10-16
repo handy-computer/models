@@ -941,7 +941,11 @@
     }
   },
   "MOSS-Transcribe-Diarize": {
-    "revision": "bfa3d24438711391d8713c6ab0efd6264527757c",
+    "repository": "handy-computer/moss-transcribe-diarize-gguf",
+    "revision": "6fdfa33aed776bbb0ac11a1a9835634fe6d75dd7",
+    "previous": [
+      "bfa3d24438711391d8713c6ab0efd6264527757c"
+    ],
     "files": {
       "MOSS-Transcribe-Diarize-BF16.gguf": {
         "size": 1826882720,

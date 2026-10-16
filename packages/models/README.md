@@ -20,7 +20,7 @@ saved setting that points at it keeps resolving through `getModel(id)`.
 ## Use
 
 ```ts
-import { recommend, CURATED_MODELS, getModel, languageAccuracyGrade, modelWaitSeconds,
+import { recommend, CURATED_MODELS, getModel, modelFile, languageAccuracyGrade, modelWaitSeconds,
   speedMeterLevel, autoLanguagePolicy, LANGUAGE_DETECTION_MODEL } from "@handy-computer/models";
 
 // Best/Fast/Accurate from the curated models this engine can load.
@@ -28,7 +28,7 @@ const picks = recommend(["en", "de"], { engineVersion: transcribeVersion() });
 for (const pick of picks) {
   pick.roles;          // ["best"], ["fast", "accurate"], ...
   pick.status;         // eligible | experimental | unsupported | unbenchmarked
-  const file = pick.model.files[pick.model.quant]!; // the default (benchmarked) file
+  const file = modelFile(pick.model); // the default (benchmarked) file: files[quant]
   pick.model.repository, pick.model.revision, file.filename, file.size, file.sha256;
 }
 ```
@@ -70,8 +70,11 @@ The only hand-edited file. It holds:
 - `methodology`: the recommendation thresholds.
 - `languageDetector`: the shared spoken-language detector.
 - `models`: the curated models, by Hugging Face repo name without `-gguf`,
-  each with a `description` and optionally a `name`. Listing a model is what
-  makes it curated; removing it makes it Published only.
+  each with a `description`. Listing a model is what makes it curated;
+  removing it makes it Published only.
+- `names`: the display name of every published model, curated or not. A
+  model missing here gets a name tidied from its id, and the daily PR lists
+  it.
 
 Everything else (languages, capabilities, licence, files, sizes, benchmarks)
 comes from transcribe.cpp and is never written here. If a fact is wrong, fix
@@ -98,18 +101,33 @@ re-uploads a model, `pins` picks the newest revision whose file sizes match
 the release and moves the old one to the pin's `previous` list. CI fails any
 change that drops a revision from `pins.json`.
 
+When Hugging Face spells a repo differently from transcribe.cpp (after a
+rename or a case change, which only redirect), the pin records Hugging Face's
+spelling and the catalog's `repository` uses it, since Hugging Face tools name
+cache folders after it. The id stays transcribe.cpp's.
+
+A public Hugging Face repo counts as released. A model whose repo is still
+private is pinned with `"private": true` and left out of the catalog; a
+later `pins` picks it up once the repo is public.
+
 ## Automation (`.github/workflows/models.yml`)
 
 Every day the workflow runs `npm run update`: it moves `curation.yaml` to the
 newest transcribe.cpp release, refreshes pins, regenerates, re-snapshots the
-picks, bumps the patch version, and tests. Then:
+picks, bumps the patch version, and tests. In practice it only finds
+something when transcribe.cpp tags a new release. Then:
 
 | What changed | What happens |
 |---|---|
 | Nothing | nothing |
-| New published models, benchmark numbers that move no pick, uncurated models | lands on main and publishes to npm |
-| Any pick, or a curated model's (or the language detector's) download, licence, languages, capabilities or minimum engine | opens (or refreshes) one PR, `bot/models-catalog`, with the changes in words; merging publishes |
+| Anything | opens (or refreshes) one PR, `bot/models-catalog`, with the changes in words; merging publishes |
 | A new model that would be picked if curated | an issue per model with the evidence and the YAML to paste; close it to say no |
+
+The PR leads with what needs a closer look: pick changes; a curated model's
+(or the language detector's) download, licence, languages, capabilities or
+minimum engine; models that need a name; and models left out because their
+repo is still private. Nothing reaches main or npm without a merge, and every
+release is a patch.
 
 PRs and pushes run `generate --check`, the tests and the build. A push to main
 with a new `version` in package.json publishes, so a hand edit (curating a

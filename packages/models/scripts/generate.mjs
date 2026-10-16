@@ -20,6 +20,10 @@
 // an app holding any revision we ever shipped can tell it is outdated rather
 // than unknown.
 //
+// A public Hugging Face repo counts as released. A model whose repo is still
+// private is pinned with `"private": true` and left out of the catalog until
+// a later `pins` finds it public.
+//
 // The transcribe.cpp checkout defaults to ../../../transcribe.cpp (a sibling
 // of this repo); override with --transcribe-cpp <path> or TRANSCRIBE_CPP. It
 // needs its release tags (git fetch --tags).
@@ -194,7 +198,7 @@ async function filesAt(repo, revision, downloads) {
     }
     files[filename] = { size, sha256 };
   }
-  return { revision: info.sha, files };
+  return { revision: info.sha, repository: info.id, files };
 }
 
 /**
@@ -223,11 +227,21 @@ async function resolvePin(repo, downloads, preferred) {
 }
 
 function pinMatches(pin, downloads) {
-  return pin && downloads.every(({ filename, size_bytes }) => pin.files[filename]?.size === size_bytes);
+  return Boolean(pin?.files) && downloads.every(({ filename, size_bytes }) => pin.files[filename]?.size === size_bytes);
+}
+
+/** Whether a repo is private (or not visible at all), so not yet released. */
+async function isPrivate(repo) {
+  const info = await hf(`models/${repo}`).catch((error) => {
+    if (error.status === 401 || error.status === 403 || error.status === 404) return { private: true };
+    throw error;
+  });
+  return info.private === true;
 }
 
 // Revisions an app already ships, from any catalog with models[].revision and
-// an id (Pi Voice) or slug (Handy). Repeatable; earlier files win.
+// an id (Pi Voice) or slug (Handy). Repeatable; earlier files win. Ids match
+// regardless of case: apps have spelled them differently.
 const preferredRevisions = new Map();
 for (const [index, value] of args.entries()) {
   if (value !== "--prefer") continue;
@@ -236,7 +250,7 @@ for (const [index, value] of args.entries()) {
     ? [{ ...source.languageDetector, id: source.languageDetector.repository.split("/")[1].replace(/-gguf$/, "") }]
     : [];
   for (const model of [...(source.models ?? []), ...detectorEntry]) {
-    const id = model.slug ?? model.id;
+    const id = (model.slug ?? model.id).toLowerCase();
     if (!model.revision) continue;
     preferredRevisions.set(id, [...(preferredRevisions.get(id) ?? []), model.revision]);
   }
@@ -251,13 +265,21 @@ if (updatePins) {
         const { record } = item;
         const repo = record.published_repo;
         const id = repo.split("/")[1].replace(/-gguf$/, "");
-        if (pinMatches(pins[id], record.downloads)) continue;
+        if (pinMatches(pins[id], record.downloads) && !pins[id].private) continue;
         try {
           const was = pins[id];
-          const preferred = [...new Set([was?.revision, ...(preferredRevisions.get(id) ?? [])].filter(Boolean))];
-          const { revision, files } = await resolvePin(repo, record.downloads, preferred);
+          if (await isPrivate(repo)) {
+            // Keep any earlier pin, so the model resumes it once public.
+            pins[id] = { private: true, ...was };
+            console.error(`skipped ${id}: ${repo} is private`);
+            continue;
+          }
+          const preferred = [...new Set([was?.revision, ...(preferredRevisions.get(id.toLowerCase()) ?? [])].filter(Boolean))];
+          const { revision, repository, files } = await resolvePin(repo, record.downloads, preferred);
           const previous = [...new Set([was?.revision, ...(was?.previous ?? [])])].filter((old) => old && old !== revision);
-          pins[id] = { revision, ...(previous.length ? { previous } : {}), files };
+          // Hugging Face's own spelling of the repo when it differs (a rename or
+          // a case change only redirects): HF tools name cache folders after it.
+          pins[id] = { ...(repository !== repo ? { repository } : {}), revision, ...(previous.length ? { previous } : {}), files };
           console.error(`pinned ${id} @ ${revision.slice(0, 12)}`);
         } catch (error) {
           problems.push(error.message);
@@ -273,8 +295,10 @@ if (updatePins) {
 if (pinsBase) {
   const base = JSON.parse(readFileSync(resolve(pinsBase), "utf8"));
   const lost = Object.entries(base).flatMap(([id, pin]) => {
-    const kept = new Set([pins[id]?.revision, ...(pins[id]?.previous ?? [])]);
-    return [pin.revision, ...(pin.previous ?? [])].filter((revision) => !kept.has(revision)).map((revision) => `${id} @ ${revision}`);
+    // A private entry may have no revision yet: nothing was shipped.
+    const known = (entry) => [entry?.revision, ...(entry?.previous ?? [])].filter(Boolean);
+    const kept = new Set(known(pins[id]));
+    return known(pin).filter((revision) => !kept.has(revision)).map((revision) => `${id} @ ${revision}`);
   });
   if (lost.length) fail(`pins.json dropped revisions it once pinned:\n  ${lost.join("\n  ")}`);
 }
@@ -282,6 +306,7 @@ if (pinsBase) {
 // ─── models ────────────────────────────────────────────────────────────────
 
 const curated = curation.models ?? {};
+const names = curation.names ?? {};
 const detector = curation.languageDetector;
 const quant = curation.benchmarks.quant;
 const models = [];
@@ -293,7 +318,13 @@ for (const { stem, blob, record } of records) {
   const id = repository.split("/")[1].replace(/-gguf$/, "");
   const role = record.role ?? "asr";
   const editorial = curated[id] ?? (detector.id === id ? detector : undefined);
+  const name = names[id];
+  if (name === undefined) console.error(`${id} has no name in curation.yaml; using ${tidyName(id)}`);
   const pin = pins[id];
+  if (pin?.private) {
+    console.error(`left out ${id}: ${repository} is private`);
+    continue;
+  }
   if (!pinMatches(pin, record.downloads)) {
     problems.push(`${id}: ${pin ? "pin is stale" : "no pin"} for transcribe.cpp ${tag}; run npm run pins`);
     continue;
@@ -310,9 +341,9 @@ for (const { stem, blob, record } of records) {
   const capabilities = record.capabilities ?? {};
   models.push({
     id,
-    name: editorial?.name ?? tidyName(id),
+    name: name ?? tidyName(id),
     description: editorial?.description ?? "",
-    repository,
+    repository: pin.repository ?? repository,
     revision: pin.revision,
     previousRevisions: pin.previous ?? [],
     license: record.license.spdx,
@@ -323,6 +354,7 @@ for (const { stem, blob, record } of records) {
       streaming: capabilities.streaming?.supported === true,
       translate: capabilities.translate?.supported === true,
       languageDetection: capabilities.lang_detect?.supported === true,
+      timestamps: capabilities.timestamps?.supported === true,
     },
     quant: defaultQuant,
     role,

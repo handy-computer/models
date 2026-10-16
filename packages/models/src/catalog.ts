@@ -1,5 +1,5 @@
 import { canonicalLanguage, languageIdentity, resolveModelLanguage } from "./languages.ts";
-import type { CatalogModel } from "./types.ts";
+import type { CatalogModel, ModelFile } from "./types.ts";
 
 const languageNames = new Intl.DisplayNames(["en"], { type: "language" });
 
@@ -45,6 +45,13 @@ export function rankCatalogModels(
       Number(isDownloaded(right)) - Number(isDownloaded(left)) ||
       left.name.localeCompare(right.name),
   );
+}
+
+/** The model's default file, `files[quant]`: the benchmarked one for curated models. */
+export function modelFile(model: CatalogModel): ModelFile {
+  const file = model.files[model.quant];
+  if (!file) throw new Error(`${model.id} has no ${model.quant} file`);
+  return file;
 }
 
 /**

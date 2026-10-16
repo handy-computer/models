@@ -9,8 +9,10 @@ import piVoiceData from "./fixtures/pi-voice-data.json" with { type: "json" };
 import piVoicePicks from "./fixtures/pi-voice-picks.json" with { type: "json" };
 
 function piVoiceCatalog(): CatalogData {
-  const model = (entry: Omit<CatalogModel, "description" | "repository" | "revision" | "previousRevisions" | "license" | "quant" | "role" | "curated" | "files"> & { capabilities: CatalogModel["capabilities"] }, role: CatalogModel["role"]): CatalogModel => ({
+  const model = (entry: Omit<CatalogModel, "description" | "repository" | "revision" | "previousRevisions" | "license" | "quant" | "role" | "curated" | "files" | "capabilities"> & { capabilities: Omit<CatalogModel["capabilities"], "timestamps"> }, role: CatalogModel["role"]): CatalogModel => ({
     ...entry,
+    // Pi Voice's data predates the timestamps capability.
+    capabilities: { ...entry.capabilities, timestamps: false },
     description: "",
     repository: "",
     revision: "",

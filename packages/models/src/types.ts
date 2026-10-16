@@ -37,6 +37,8 @@ export type CatalogModel = {
     readonly streaming: boolean;
     readonly translate: boolean;
     readonly languageDetection: boolean;
+    /** Can return word or segment timestamps. */
+    readonly timestamps: boolean;
   };
   /** The default file's key in `files`: always the benchmarked quant for curated models. */
   readonly quant: string;
