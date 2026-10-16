@@ -31,7 +31,10 @@
   "canary-180m-flash": {
     "revision": "46b86384d1db59108d6e060a0fc00924cb58499f",
     "previous": [
-      "b147f9dc52b59f0998e410540a84727bd86457fd"
+      {
+        "revision": "b147f9dc52b59f0998e410540a84727bd86457fd",
+        "date": "2026-06-28T13:16:42Z"
+      }
     ],
     "files": {
       "canary-180m-flash-F32.gguf": {
@@ -63,7 +66,10 @@
   "canary-1b": {
     "revision": "9661a6a5a46f2f2cb6ff7062fef7b0fbbdb31498",
     "previous": [
-      "f2eaa93b2221b6a28e5a00111a3e93f62964dff3"
+      {
+        "revision": "f2eaa93b2221b6a28e5a00111a3e93f62964dff3",
+        "date": "2026-06-28T13:16:48Z"
+      }
     ],
     "files": {
       "canary-1b-F32.gguf": {
@@ -95,7 +101,10 @@
   "canary-1b-flash": {
     "revision": "bd27c7ef67ca6347ae2f729a130658466beecc85",
     "previous": [
-      "b427664769b93c021df108a2fa8bfb858ae236c1"
+      {
+        "revision": "b427664769b93c021df108a2fa8bfb858ae236c1",
+        "date": "2026-06-28T13:16:45Z"
+      }
     ],
     "files": {
       "canary-1b-flash-F32.gguf": {
@@ -972,8 +981,14 @@
   "multitalker-parakeet-streaming-0.6b-v1": {
     "revision": "a9a7208d8f205b5816770a6f7fb83afc81a7691b",
     "previous": [
-      "31042fb4b5018be38240018492bdbde1923789dc",
-      "0314bc0d2f4be9a0d79fa5eeb36ad1f3962cfcbb"
+      {
+        "revision": "31042fb4b5018be38240018492bdbde1923789dc",
+        "date": "2026-07-30T08:55:28Z"
+      },
+      {
+        "revision": "0314bc0d2f4be9a0d79fa5eeb36ad1f3962cfcbb",
+        "date": "2026-07-13T04:35:10Z"
+      }
     ],
     "files": {
       "bundle/multitalker-parakeet-streaming-0.6b-v1-F32.gguf": {
