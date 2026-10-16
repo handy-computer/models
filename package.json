@@ -11,7 +11,7 @@
     "build": "NODE_OPTIONS=--disable-warning=ExperimentalWarning astro build",
     "preview": "NODE_OPTIONS=--disable-warning=ExperimentalWarning astro preview",
     "check": "NODE_OPTIONS=--disable-warning=ExperimentalWarning astro check",
-    "deploy": "NODE_OPTIONS=--disable-warning=ExperimentalWarning astro build && wrangler deploy",
+    "deploy": "wrangler deploy",
     "astro": "astro"
   },
   "dependencies": {
