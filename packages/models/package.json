@@ -6,7 +6,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/handy-computer/models.handy.computer.git",
+    "url": "git+https://github.com/handy-computer/models.git",
     "directory": "packages/models"
   },
   "exports": {

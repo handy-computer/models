@@ -118,7 +118,7 @@ One-time setup:
    GitHub Actions to create and approve pull requests.
 2. Publish 0.1.0 by hand once (`npm publish --access public` from this
    folder), then on npmjs.com add a trusted publisher for the package:
-   GitHub Actions, `handy-computer/models.handy.computer`, workflow
+   GitHub Actions, `handy-computer/models`, workflow
    `models.yml`. Trusted publishing needs no token to rotate. Alternatively,
    set an `NPM_TOKEN` repository secret.
 3. Optional: an `HF_TOKEN` secret, if Hugging Face rate-limits the pin step.
