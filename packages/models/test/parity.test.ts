@@ -9,23 +9,21 @@ import piVoiceData from "./fixtures/pi-voice-data.json" with { type: "json" };
 import piVoicePicks from "./fixtures/pi-voice-picks.json" with { type: "json" };
 
 function piVoiceCatalog(): CatalogData {
-  const model = (entry: Omit<CatalogModel, "description" | "repository" | "revision" | "license" | "quant" | "filename" | "size" | "sha256" | "role" | "curated" | "files"> & { capabilities: CatalogModel["capabilities"] }, role: CatalogModel["role"]): CatalogModel => ({
+  const model = (entry: Omit<CatalogModel, "description" | "repository" | "revision" | "previousRevisions" | "license" | "quant" | "role" | "curated" | "files"> & { capabilities: CatalogModel["capabilities"] }, role: CatalogModel["role"]): CatalogModel => ({
     ...entry,
     description: "",
     repository: "",
     revision: "",
+    previousRevisions: [],
     license: "",
     quant: "Q8_0",
-    filename: "",
-    size: 0,
-    sha256: "",
     role,
     curated: role === "asr",
-    files: [],
+    files: {},
   });
   const detector = piVoiceData.languageDetector;
   return {
-    schema: 1,
+    schema: 2,
     transcribeCpp: "0.4.0",
     methodology: piVoiceData.methodology,
     benchmarks: {},

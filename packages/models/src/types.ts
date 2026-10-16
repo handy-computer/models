@@ -2,7 +2,7 @@
 export type ModelRole = "asr" | "langid" | "vad" | "diarize";
 
 export type ModelFile = {
-  readonly quant: string;
+  /** Path within the repository at `revision`. */
   readonly filename: string;
   /** Exact size in bytes. */
   readonly size: number;
@@ -20,6 +20,12 @@ export type CatalogModel = {
   readonly repository: string;
   /** Pinned commit; download from `resolve/<revision>/<filename>`. */
   readonly revision: string;
+  /**
+   * Revisions shipped before `revision`, most recently replaced first. A
+   * download at one of these is an older version of this model; one at
+   * neither is not ours.
+   */
+  readonly previousRevisions: readonly string[];
   /** SPDX id, or "other". */
   readonly license: string;
   /** The loader architecture (the GGUF's general.architecture). */
@@ -32,18 +38,15 @@ export type CatalogModel = {
     readonly translate: boolean;
     readonly languageDetection: boolean;
   };
-  /** The default file: always the benchmarked quant for curated models. */
+  /** The default file's key in `files`: always the benchmarked quant for curated models. */
   readonly quant: string;
-  readonly filename: string;
-  readonly size: number;
-  readonly sha256: string;
   readonly role: ModelRole;
   /** Shown by default and eligible for recommendations. */
   readonly curated: boolean;
   /** Oldest transcribe.cpp release that publishes these exact files. */
   readonly minEngine?: string;
-  /** Every published quant, the default included. */
-  readonly files: readonly ModelFile[];
+  /** Every published file by quant, the default included. */
+  readonly files: Readonly<Record<string, ModelFile>>;
 };
 
 /**
@@ -98,7 +101,7 @@ export type ModelResults = {
 
 /** The shape of catalog.json. */
 export type CatalogData = {
-  readonly schema: 1;
+  readonly schema: 2;
   /** The transcribe.cpp release the facts and benchmarks come from. */
   readonly transcribeCpp: string;
   readonly methodology: Methodology;

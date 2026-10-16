@@ -56,8 +56,14 @@ jobs:
       - name: Fetch transcribe.cpp (tags and trees; catalog files on demand)
         run: git clone -q --filter=blob:none --no-checkout https://github.com/handy-computer/transcribe.cpp "$TRANSCRIBE_CPP"
       - run: npm ci
-      - name: catalog.json matches curation.yaml, pins.json and transcribe.cpp
-        run: npm run generate -- --check
+      - name: Fetch the pins.json this change started from
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          { git fetch -q --depth=1 origin "$BASE" && git show "$BASE:packages/models/pins.json"; } > "$RUNNER_TEMP/base-pins.json" 2>/dev/null \
+            || echo '{}' > "$RUNNER_TEMP/base-pins.json"
+      - name: catalog.json matches curation.yaml, pins.json and transcribe.cpp; no pinned revision dropped
+        run: npm run generate -- --check --pins-base "$RUNNER_TEMP/base-pins.json"
       - run: npm test
       - run: npm run build
 

@@ -16,8 +16,9 @@
 // Writes changed/review/title to $GITHUB_OUTPUT when set. Does not commit.
 
 import { execFileSync } from "node:child_process";
-import { appendFileSync, readFileSync, writeFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { appendFileSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createCatalog } from "../src/create.ts";
 import { compareEngineVersions } from "../src/catalog.ts";
@@ -63,7 +64,10 @@ if (compareEngineVersions(latest, current) > 0) {
 }
 
 // Pins only move for files that changed; then rebuild everything from them.
-run("node", ["scripts/generate.mjs", "--update-pins", "--transcribe-cpp", transcribeCpp]);
+// The bot's own pushes skip the check job, so guard the pin history here.
+const basePins = join(mkdtempSync(join(tmpdir(), "models-")), "pins.json");
+writeFileSync(basePins, before["pins.json"]!);
+run("node", ["scripts/generate.mjs", "--update-pins", "--transcribe-cpp", transcribeCpp, "--pins-base", basePins]);
 
 const newCatalog: CatalogData = JSON.parse(read("catalog.json"));
 const catalog = createCatalog(newCatalog);
