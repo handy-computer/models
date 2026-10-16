@@ -38,8 +38,12 @@ export {
   type RecommendationStatus,
 } from "./recommendations.ts";
 
-/** The catalog bundled with this package version. */
-export const catalog = createCatalog(bundled as CatalogData);
+/**
+ * The catalog bundled with this package version. TypeScript infers each
+ * model's `files` as a different object shape, so the JSON only fits
+ * CatalogData through unknown; generate.mjs and the tests vouch for it.
+ */
+export const catalog = createCatalog(bundled as unknown as CatalogData);
 
 export const TRANSCRIBE_CPP_VERSION = catalog.transcribeCpp;
 /** Every published model, curated or not, of every role. */

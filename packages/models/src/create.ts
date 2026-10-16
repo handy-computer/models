@@ -11,7 +11,7 @@ export type Catalog = ReturnType<typeof createCatalog>;
  * other data (a newer catalog fetched at runtime, or a test fixture).
  */
 export function createCatalog(data: CatalogData) {
-  if (data.schema !== 1) throw new Error(`Unsupported catalog schema ${String(data.schema)}`);
+  if (data.schema !== 2) throw new Error(`Unsupported catalog schema ${String(data.schema)}`);
   const byId = new Map(data.models.map((model) => [model.id, model]));
   const languageDetectionModel = byId.get(data.languageDetector);
   if (!languageDetectionModel) throw new Error(`Catalog has no language detector ${data.languageDetector}`);

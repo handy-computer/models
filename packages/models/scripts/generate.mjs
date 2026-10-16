@@ -10,10 +10,15 @@
 //   npm run generate -- --check      exit 1 when catalog.json is out of date
 //   npm run pins                     refresh pins from Hugging Face, then generate
 //   npm run pins -- --prefer <catalog.json>   try an app's existing revisions first
+//   --pins-base <pins.json>          fail if a revision in that earlier pins.json
+//                                    is neither current nor previous here
 //
 // A pin only moves when the bytes change. The apps find downloads under
 // snapshots/<revision>/, so a new revision with identical files would make
-// every existing user download the model again.
+// every existing user download the model again. When it moves, the old
+// revision joins the pin's `previous` list, newest first, which only grows:
+// an app holding any revision we ever shipped can tell it is outdated rather
+// than unknown.
 //
 // The transcribe.cpp checkout defaults to ../../../transcribe.cpp (a sibling
 // of this repo); override with --transcribe-cpp <path> or TRANSCRIBE_CPP. It
@@ -21,7 +26,7 @@
 
 import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { basename, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
 
@@ -38,6 +43,7 @@ const transcribeCpp = resolve(
 );
 const updatePins = flag("--update-pins");
 const check = flag("--check");
+const pinsBase = option("--pins-base");
 const catalogPath = resolve(root, "catalog.json");
 const pinsPath = resolve(root, "pins.json");
 
@@ -111,9 +117,10 @@ const records = [...(releaseBlobs.get(tag) ?? [])]
 // carry no hashes). Not the release that first listed the model: a
 // re-conversion ships with the engine change it needs, so that release can be
 // too old for today's files. Models predating the catalog get the first
-// catalogued release, which is conservative.
+// catalogued release, which is conservative. Names compare without their
+// folder, so moving a file within the repo doesn't count as a change.
 const downloadsKey = (record) =>
-  JSON.stringify((record.downloads ?? []).map(({ filename, size_bytes }) => [filename, size_bytes]).sort());
+  JSON.stringify((record.downloads ?? []).map(({ filename, size_bytes }) => [basename(filename), size_bytes]).sort());
 function minEngine(stem, blob, record) {
   const key = downloadsKey(record);
   let oldest = tag;
@@ -246,9 +253,12 @@ if (updatePins) {
         const id = repo.split("/")[1].replace(/-gguf$/, "");
         if (pinMatches(pins[id], record.downloads)) continue;
         try {
-          const preferred = [...new Set([pins[id]?.revision, ...(preferredRevisions.get(id) ?? [])].filter(Boolean))];
-          pins[id] = await resolvePin(repo, record.downloads, preferred);
-          console.error(`pinned ${id} @ ${pins[id].revision.slice(0, 12)}`);
+          const was = pins[id];
+          const preferred = [...new Set([was?.revision, ...(preferredRevisions.get(id) ?? [])].filter(Boolean))];
+          const { revision, files } = await resolvePin(repo, record.downloads, preferred);
+          const previous = [...new Set([was?.revision, ...(was?.previous ?? [])])].filter((old) => old && old !== revision);
+          pins[id] = { revision, ...(previous.length ? { previous } : {}), files };
+          console.error(`pinned ${id} @ ${revision.slice(0, 12)}`);
         } catch (error) {
           problems.push(error.message);
         }
@@ -256,6 +266,17 @@ if (updatePins) {
     }),
   );
   if (problems.length) fail(`could not pin:\n  ${problems.join("\n  ")}`);
+}
+
+// Every revision ever pinned stays known, so a hand edit can't quietly turn
+// an outdated download into an unknown one.
+if (pinsBase) {
+  const base = JSON.parse(readFileSync(resolve(pinsBase), "utf8"));
+  const lost = Object.entries(base).flatMap(([id, pin]) => {
+    const kept = new Set([pins[id]?.revision, ...(pins[id]?.previous ?? [])]);
+    return [pin.revision, ...(pin.previous ?? [])].filter((revision) => !kept.has(revision)).map((revision) => `${id} @ ${revision}`);
+  });
+  if (lost.length) fail(`pins.json dropped revisions it once pinned:\n  ${lost.join("\n  ")}`);
 }
 
 // ─── models ────────────────────────────────────────────────────────────────
@@ -278,14 +299,13 @@ for (const { stem, blob, record } of records) {
     continue;
   }
 
-  const files = record.downloads.map(({ quant: fileQuant, filename, size_bytes }) => ({
-    quant: fileQuant,
-    filename,
-    size: size_bytes,
-    sha256: pin.files[filename].sha256,
-  }));
-  const defaultFile = files.find((file) => file.quant === quant) ?? files[0];
-  if (curated[id] && defaultFile.quant !== quant) problems.push(`${id}: curated but has no ${quant} file`);
+  const files = {};
+  for (const { quant: fileQuant, filename, size_bytes } of record.downloads) {
+    if (fileQuant in files) problems.push(`${id}: two ${fileQuant} files`);
+    files[fileQuant] = { filename, size: size_bytes, sha256: pin.files[filename].sha256 };
+  }
+  const defaultQuant = quant in files ? quant : Object.keys(files)[0];
+  if (curated[id] && defaultQuant !== quant) problems.push(`${id}: curated but has no ${quant} file`);
 
   const capabilities = record.capabilities ?? {};
   models.push({
@@ -294,6 +314,7 @@ for (const { stem, blob, record } of records) {
     description: editorial?.description ?? "",
     repository,
     revision: pin.revision,
+    previousRevisions: pin.previous ?? [],
     license: record.license.spdx,
     family: record.family,
     parameters: parameterLabel(record.params),
@@ -303,10 +324,7 @@ for (const { stem, blob, record } of records) {
       translate: capabilities.translate?.supported === true,
       languageDetection: capabilities.lang_detect?.supported === true,
     },
-    quant: defaultFile.quant,
-    filename: defaultFile.filename,
-    size: defaultFile.size,
-    sha256: defaultFile.sha256,
+    quant: defaultQuant,
     role,
     curated: Boolean(curated[id]),
     minEngine: minEngine(stem, blob, record),
@@ -319,7 +337,7 @@ for (const { stem, blob, record } of records) {
   const accuracy = {};
   for (const row of record.accuracy_benchmarks ?? []) {
     if (row.dataset !== curation.benchmarks.accuracy.dataset) continue;
-    if (row.split !== curation.benchmarks.accuracy.split || row.quant !== defaultFile.quant) continue;
+    if (row.split !== curation.benchmarks.accuracy.split || row.quant !== defaultQuant) continue;
     if (row.scoring || row.mode) continue;
     const language = datasetLanguage(row.language);
     if (language in accuracy) continue;
@@ -328,7 +346,7 @@ for (const { stem, blob, record } of records) {
   const performance = {};
   for (const [tier, rig] of Object.entries(curation.benchmarks.speed)) {
     const runs = (record.speed_benchmarks ?? []).filter(
-      (row) => row.machine === rig.machine && row.backend === rig.backend && row.quant === defaultFile.quant,
+      (row) => row.machine === rig.machine && row.backend === rig.backend && row.quant === defaultQuant,
     );
     if (runs.length) performance[tier] = Number(average(runs.map((row) => row.xrt_compute)).toFixed(3));
   }
@@ -360,7 +378,7 @@ models.sort((a, b) => {
 });
 
 const catalog = {
-  schema: 1,
+  schema: 2,
   transcribeCpp: tag.replace(/^v/, ""),
   methodology: curation.methodology,
   benchmarks: curation.benchmarks,
@@ -371,7 +389,7 @@ const catalog = {
 
 // One model field per line, small objects (cells, files, capabilities) inline.
 const text = `${JSON.stringify(catalog, null, 2).replace(
-  /\{\n\s+"(?:error|accelerated|cpu|streaming|quant)":[^{}[\]]*?\n\s*\}/g,
+  /\{\n\s+"(?:error|accelerated|cpu|streaming|filename)":[^{}[\]]*?\n\s*\}/g,
   (block) => JSON.stringify(JSON.parse(block)).replaceAll('":', '": ').replaceAll(/,(?=")/g, ", "),
 )}\n`;
 const pinsText = `${JSON.stringify(Object.fromEntries(Object.entries(pins).sort(([a], [b]) => a.localeCompare(b))), null, 2)}\n`;

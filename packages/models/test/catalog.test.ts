@@ -21,16 +21,19 @@ test("every download is pinned and hashed, and the default file is one of them",
   for (const model of ALL_MODELS) {
     assert.match(model.revision, /^[0-9a-f]{40}$/, model.id);
     assert.match(model.repository, /^handy-computer\/.+-gguf$/, model.id);
-    assert.ok(model.files.length > 0, model.id);
-    for (const file of model.files) {
+    assert.ok(model.files[model.quant], model.id);
+    for (const file of Object.values(model.files)) {
       assert.match(file.sha256, /^[0-9a-f]{64}$/, `${model.id} ${file.filename}`);
       assert.ok(file.size > 0);
     }
-    assert.deepEqual(
-      model.files.find((file) => file.filename === model.filename),
-      { quant: model.quant, filename: model.filename, size: model.size, sha256: model.sha256 },
-      model.id,
-    );
+  }
+});
+
+test("previous revisions are distinct commits other than the current one", () => {
+  for (const model of ALL_MODELS) {
+    for (const revision of model.previousRevisions) assert.match(revision, /^[0-9a-f]{40}$/, model.id);
+    const all = [model.revision, ...model.previousRevisions];
+    assert.equal(new Set(all).size, all.length, model.id);
   }
 });
 

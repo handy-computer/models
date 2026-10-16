@@ -28,13 +28,19 @@ const picks = recommend(["en", "de"], { engineVersion: transcribeVersion() });
 for (const pick of picks) {
   pick.roles;          // ["best"], ["fast", "accurate"], ...
   pick.status;         // eligible | experimental | unsupported | unbenchmarked
-  pick.model.repository, pick.model.revision, pick.model.filename, pick.model.sha256;
+  const file = pick.model.files[pick.model.quant]!; // the default (benchmarked) file
+  pick.model.repository, pick.model.revision, file.filename, file.size, file.sha256;
 }
 ```
 
 Download from `https://huggingface.co/<repository>/resolve/<revision>/<filename>`
-and verify `sha256`. `files` lists every quant; `quant`/`filename`/`size`/
-`sha256` at the top level are the default (benchmarked) file.
+and verify `sha256`. `files` holds every published file, keyed by quant;
+`quant` names the default.
+
+`previousRevisions` lists the revisions this model was pinned to before
+`revision`, newest first, and only ever grows. A download at one of them is
+an older version of the model, so an update exists; a download at neither
+isn't one the catalog ever shipped. What to do about either is the app's call.
 
 Rust (Handy) reads the same file: `@handy-computer/models/catalog.json`.
 Unknown fields can be ignored; the `schema` number changes on any breaking
@@ -89,7 +95,8 @@ pins`.
 find downloads under `snapshots/<revision>/`, so a new revision with identical
 files would make every user download the model again. When transcribe.cpp
 re-uploads a model, `pins` picks the newest revision whose file sizes match
-the release.
+the release and moves the old one to the pin's `previous` list. CI fails any
+change that drops a revision from `pins.json`.
 
 ## Automation (`.github/workflows/models.yml`)
 
