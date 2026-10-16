@@ -2,10 +2,10 @@
 #
 #   pull_request / push   generate --check, tests, build
 #   schedule (daily)      move to the newest transcribe.cpp release, refresh
-#                         pins, regenerate. Changes that move no pick and touch
-#                         no curated download land on main and publish; anything
-#                         else opens (or refreshes) one PR for review. New models
-#                         that would be picked if curated get an issue each.
+#                         pins, regenerate. Any change opens (or refreshes) one
+#                         PR for review; nothing lands on main without a merge.
+#                         New models that would be picked if curated get an
+#                         issue each.
 #   push to main          publish to npm when package.json has a new version
 #
 # One-time setup (see packages/models/README.md):
@@ -75,8 +75,6 @@ jobs:
       contents: write
       pull-requests: write
       issues: write
-    outputs:
-      landed: ${{ steps.land.outputs.landed }}
     env:
       GH_TOKEN: ${{ github.token }}
       HF_TOKEN: ${{ secrets.HF_TOKEN }}
@@ -84,8 +82,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          # Always main, even when dispatched from another branch: this job
-          # pushes to main and bases the review PR on it.
+          # Always main, even when dispatched from another branch: the review
+          # PR is based on it.
           ref: main
       - uses: actions/setup-node@v5
         with:
@@ -107,25 +105,8 @@ jobs:
           npm run build
           cat "$RUNNER_TEMP/summary.md" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Land on main
-        id: land
-        if: steps.update.outputs.changed == 'true' && steps.update.outputs.review == 'false'
-        env:
-          TITLE: ${{ steps.update.outputs.title }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-          git add -A .
-          git commit -q -F - <<EOF
-          $TITLE
-
-          $(tail -n +3 "$RUNNER_TEMP/summary.md")
-          EOF
-          git push origin HEAD:main
-          echo "landed=true" >> "$GITHUB_OUTPUT"
-
       - name: Open or refresh the review PR
-        if: steps.update.outputs.changed == 'true' && steps.update.outputs.review == 'true'
+        if: steps.update.outputs.changed == 'true'
         env:
           TITLE: ${{ steps.update.outputs.title }}
         run: |
@@ -162,11 +143,8 @@ jobs:
           done
 
   publish:
-    needs: [check, update]
-    if: >-
-      always() &&
-      ((github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.check.result == 'success') ||
-       needs.update.outputs.landed == 'true')
+    needs: check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -174,9 +152,6 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v5
-        with:
-          # The bot's commit when the update landed one; otherwise this push.
-          ref: ${{ needs.update.outputs.landed == 'true' && 'main' || github.sha }}
       - uses: actions/setup-node@v5
         with:
           node-version: 22

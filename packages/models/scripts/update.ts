@@ -1,13 +1,13 @@
 // The daily update. Moves curation.yaml to the newest transcribe.cpp release,
 // refreshes pins, regenerates catalog.json and the picks snapshot, bumps the
-// package version, and writes a plain-words summary. It decides whether the
-// change can land on its own or needs a person:
+// patch version, and writes a plain-words summary for the PR it goes out in.
+// Every change is a PR; the summary leads with what needs a closer look:
 //
-//   lands on its own   new published models, benchmark numbers that move no
-//                      pick, changes to models that aren't curated
 //   needs review       any pick changes, or a curated model's (or the language
 //                      detector's) download, licence, languages, capabilities
 //                      or minimum engine changes, or a curated model disappears
+//   needs a name       published models missing from `names` in curation.yaml
+//   not yet public     models left out because their Hugging Face repo is private
 //
 //   node scripts/update.ts [--transcribe-cpp <path>] [--summary <file>] [--candidates <file>]
 //
@@ -20,6 +20,7 @@ import { appendFileSync, mkdtempSync, readFileSync, writeFileSync } from "node:f
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { parse as parseYaml } from "yaml";
 import { createCatalog } from "../src/create.ts";
 import { compareEngineVersions } from "../src/catalog.ts";
 import { languageIdentity } from "../src/languages.ts";
@@ -199,6 +200,17 @@ if (added.length) {
     lines.push(`- \`${model.id}\`, needs transcribe.cpp ${model.minEngine}${note}`);
   }
   lines.push("");
+}
+const names: Record<string, string> = parseYaml(read("curation.yaml")).names ?? {};
+const unnamed = newCatalog.models.filter((model) => !(model.id in names));
+if (unnamed.length) {
+  lines.push("### Needs a name", "", "These use a name tidied from the id. Add them to `names` in `curation.yaml`:", "");
+  lines.push("```yaml", ...unnamed.map((model) => `  ${model.id}: ${model.name}`), "```", "");
+}
+const pins: Record<string, { private?: boolean }> = JSON.parse(read("pins.json"));
+const notPublic = Object.keys(pins).filter((id) => pins[id]!.private);
+if (notPublic.length) {
+  lines.push("### Not yet public", "", `Left out until their Hugging Face repo is public: ${notPublic.join(", ")}.`, "");
 }
 const other: string[] = [];
 if (curatedResultChanges.length) {

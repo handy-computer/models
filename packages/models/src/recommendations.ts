@@ -145,6 +145,7 @@ function scoreModels(
   const wanted = [...new Set(languages.map(languageIdentity))];
   const method = context.methodology;
   const scored: ScoredModel[] = [];
+  if (wanted.length === 0) return scored;
 
   for (const model of models) {
     if (!wanted.every((language) => modelMatchesLanguage(model, language))) continue;
@@ -241,14 +242,14 @@ function fallbackRecommendation(
   models: readonly CatalogModel[],
   languages: readonly string[],
 ): ModelRecommendation[] {
+  // Only models that speak every chosen language: when none does, there is
+  // nothing to recommend, rather than a model that can't help.
   const wanted = [...new Set(languages.map(languageIdentity))];
-  const compatible = models.filter(
-    (model) =>
-      wanted.every((language) => modelMatchesLanguage(model, language)) &&
-      (wanted.length === 1 ||
-        undetectablePreferences(context.detectorCodes, model, languages).length === 0),
+  const speaking = models.filter((model) => wanted.every((language) => modelMatchesLanguage(model, language)));
+  const detecting = speaking.filter(
+    (model) => wanted.length === 1 || undetectablePreferences(context.detectorCodes, model, languages).length === 0,
   );
-  const model = rankCatalogModels(compatible.length ? compatible : models, wanted)[0];
+  const model = rankCatalogModels(detecting.length ? detecting : speaking, wanted)[0];
   return model
     ? [{ model, roles: ["best", "fast", "accurate"], status: "unbenchmarked" }]
     : [];
@@ -267,13 +268,15 @@ function lowest<T>(items: readonly T[], key: (item: T) => number): T | undefined
  * other model earns the fast or accurate role, the overall pick carries it,
  * so callers can rely on all three without special cases. The picks do not
  * depend on the machine: they are judged on the benchmark rig, and the Try
- * it step measures the real wait.
+ * it step measures the real wait. No languages, or a language no model
+ * speaks, gets no picks.
  */
 export function recommendModels(
   context: RecommendationContext,
   models: readonly CatalogModel[],
   languages: readonly string[],
 ): ModelRecommendation[] {
+  if (languages.length === 0) return [];
   const scored = scoreModels(context, models, languages);
   if (scored.length === 0) return fallbackRecommendation(context, models, languages);
   const method = context.methodology;

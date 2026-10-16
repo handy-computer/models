@@ -35,96 +35,147 @@ methodology:
 # can identify. Recommendations depend on its language list.
 languageDetector:
   id: lang-id-voxlingua107-ecapa
-  name: VoxLingua107 language detector
   description: Shared spoken-language detector for multilingual transcription models
 
-# Curated models, keyed by Hugging Face repo name without "-gguf".
-# name is optional (defaults to a tidied id); description is required.
+# Curated models, keyed by Hugging Face repo name without "-gguf", with
+# their editorial description. Names are in `names` below.
 models:
   parakeet-unified-en-0.6b:
-    name: Parakeet Unified EN 0.6B
     description: Best all-around choice for English dictation
   nemotron-3.5-asr-streaming-0.6b:
-    name: Nemotron Streaming 3.5
     description: Fast and accurate transcription in many European languages
   canary-180m-flash:
-    name: Canary 180M Flash
     description: Tiny, fast, and runs well on any hardware
   cohere-transcribe-03-2026:
-    name: Cohere Transcribe
     description: Consistently strong in many languages, best for Greek and Polish
   whisper-medium:
-    name: Whisper Medium
     description: Broadest language support, but may run a bit slow
   Voxtral-Mini-4B-Realtime-2602:
-    name: Voxtral Mini 4B Realtime
     description: Multilingual, very accurate in Italian and Spanish. Best on Apple Silicon or discrete GPUs
   parakeet-ultra:
-    name: Parakeet Ultra
     description: Best accuracy across 25 European languages
   parakeet-tdt-0.6b-v3:
-    name: Parakeet TDT 0.6B v3
     description: Fast and accurate, great overall multilingual pick
   parakeet-tdt-0.6b-v2:
-    name: Parakeet TDT 0.6B v2
     description: Excellent English only model, runs on any hardware
   Qwen3-ASR-0.6B:
-    name: Qwen3-ASR 0.6B
     description: Best for Chinese, Cantonese, and Asian languages with English
   Fun-ASR-MLT-Nano-2512:
-    name: Fun-ASR Nano Multilingual
     description: Best for Japanese, good at Thai, Indonesian, Malay
   canary-1b-v2:
-    name: Canary 1B v2
     description: Most accurate small model for European languages
   canary-qwen-2.5b:
-    name: Canary-Qwen 2.5B
     description: Very accurate English. Slow without a GPU.
   cohere-transcribe-arabic-07-2026:
-    name: Cohere Transcribe Arabic
     description: Best for Arabic and Arabic/English speakers
   Fun-ASR-Nano-2512:
-    name: Fun-ASR Nano
     description: Good for Mandarin, English, Japanese
   gigaam-v3-e2e-ctc:
-    name: GigaAM v3 E2E-CTC
     description: Russian only.
   gigaam-v3-e2e-rnnt:
-    name: GigaAM v3 E2E-RNN-T
     description: Best for Russian dictation. English may be unreliable.
   granite-speech-5.0-470m-turboctc:
-    name: Granite Speech 5.0 470M TurboCTC
     description: Extremely fast English transcription, best on GPU
   granite-speech-4.1-2b:
-    name: Granite Speech 4.1 2B
     description: Accurate with translation support. Best with GPU
   medasr:
-    name: MedASR
     description: For clinicians dictating notes. Poor on general speech
   parakeet-tdt_ctc-110m:
-    name: Parakeet TDT-CTC 110M
     description: Tiny English model, virtually instant even on CPU
   multitalker-parakeet-streaming-0.6b-v1:
-    name: Parakeet Multitalker EN
     description: For overlapping speakers in meetings, not for solo dictation
   Qwen3-ASR-1.7B:
-    name: Qwen3-ASR 1.7B
     description: Top accuracy across languages. Best on Apple Silicon or a GPU
   SenseVoiceSmall:
-    name: SenseVoice Small
     description: Instant Mandarin, Japanese, Korean on any machine. Weak Cantonese
   Voxtral-Mini-3B-2507:
-    name: Voxtral Mini 3B
     description: Accurate with translation support. Best on Apple Silicon or a GPU.
   whisper-small:
-    name: Whisper Small
     description: Wide language support in a relatively small model.
   whisper-large-v3-turbo:
-    name: Whisper Large v3 Turbo
     description: Accurate in many languages. Slow without a GPU
   Breeze-ASR-25:
-    name: Breeze-ASR-25
     description: Taiwan Mandarin with English mixed in. Traditional script, no punctuation
   whisper-large-v3:
-    name: Whisper Large v3
     description: Most languages at usable accuracy. Best on Apple Silicon or a GPU.
+
+# The display name of every published model, curated or not: the one place
+# names are decided. A model missing here gets a name tidied from its id, and
+# the daily update's PR lists it so it can be named.
+names:
+  parakeet-unified-en-0.6b: Parakeet Unified English 0.6B
+  nemotron-3.5-asr-streaming-0.6b: Nemotron Streaming 3.5
+  canary-180m-flash: Canary 180M Flash
+  cohere-transcribe-03-2026: Cohere Transcribe
+  whisper-medium: Whisper Medium
+  Voxtral-Mini-4B-Realtime-2602: Voxtral Mini 4B Realtime
+  parakeet-ultra: Parakeet Ultra
+  parakeet-tdt-0.6b-v3: Parakeet TDT 0.6B v3
+  parakeet-tdt-0.6b-v2: Parakeet TDT 0.6B v2
+  Qwen3-ASR-0.6B: Qwen3-ASR 0.6B
+  Fun-ASR-MLT-Nano-2512: Fun-ASR Nano Multilingual
+  canary-1b-v2: Canary 1B v2
+  canary-qwen-2.5b: Canary-Qwen 2.5B
+  cohere-transcribe-arabic-07-2026: Cohere Transcribe Arabic
+  Fun-ASR-Nano-2512: Fun-ASR Nano
+  gigaam-v3-e2e-ctc: GigaAM v3 E2E-CTC
+  gigaam-v3-e2e-rnnt: GigaAM v3 E2E-RNN-T
+  granite-speech-5.0-470m-turboctc: Granite Speech 5.0 470M TurboCTC
+  granite-speech-4.1-2b: Granite Speech 4.1 2B
+  medasr: MedASR
+  parakeet-tdt_ctc-110m: Parakeet TDT-CTC 110M
+  multitalker-parakeet-streaming-0.6b-v1: Parakeet Multitalker English
+  Qwen3-ASR-1.7B: Qwen3-ASR 1.7B
+  SenseVoiceSmall: SenseVoice Small
+  Voxtral-Mini-3B-2507: Voxtral Mini 3B
+  whisper-small: Whisper Small
+  whisper-large-v3-turbo: Whisper Large v3 Turbo
+  Breeze-ASR-25: Breeze-ASR-25
+  whisper-large-v3: Whisper Large v3
+  canary-1b: Canary 1B
+  canary-1b-flash: Canary 1B Flash
+  diar_streaming_sortformer_4spk-v2.1: Streaming Sortformer 4-Speaker v2.1
+  gigaam-v3-ctc: GigaAM v3 CTC
+  gigaam-v3-rnnt: GigaAM v3 RNN-T
+  granite-4.0-1b-speech: Granite Speech 4.0 1B
+  granite-speech-4.1-2b-nar: Granite Speech 4.1 2B NAR
+  granite-speech-4.1-2b-plus: Granite Speech 4.1 2B Plus
+  granite-speech-5.0-470m-turboctc-nc: Granite Speech 5.0 470M TurboCTC (Non-Commercial)
+  lang-id-voxlingua107-ecapa: VoxLingua107 Language ID
+  moonshine-base: Moonshine Base
+  moonshine-base-ar: Moonshine Base Arabic
+  moonshine-base-ja: Moonshine Base Japanese
+  moonshine-base-ko: Moonshine Base Korean
+  moonshine-base-uk: Moonshine Base Ukrainian
+  moonshine-base-vi: Moonshine Base Vietnamese
+  moonshine-base-zh: Moonshine Base Chinese
+  moonshine-streaming-medium: Moonshine Streaming Medium
+  moonshine-streaming-small: Moonshine Streaming Small
+  moonshine-streaming-tiny: Moonshine Streaming Tiny
+  moonshine-tiny: Moonshine Tiny
+  moonshine-tiny-ar: Moonshine Tiny Arabic
+  moonshine-tiny-ja: Moonshine Tiny Japanese
+  moonshine-tiny-ko: Moonshine Tiny Korean
+  moonshine-tiny-uk: Moonshine Tiny Ukrainian
+  moonshine-tiny-vi: Moonshine Tiny Vietnamese
+  moonshine-tiny-zh: Moonshine Tiny Chinese
+  MOSS-Transcribe-Diarize: MOSS Transcribe Diarize
+  nemotron-speech-streaming-en-0.6b: Nemotron Speech Streaming English 0.6B
+  orukeet: Orukeet
+  parakeet-ctc-0.6b: Parakeet CTC 0.6B
+  parakeet-ctc-1.1b: Parakeet CTC 1.1B
+  parakeet-primeline: Parakeet Primeline
+  parakeet-rnnt-0.6b: Parakeet RNN-T 0.6B
+  parakeet-rnnt-1.1b: Parakeet RNN-T 1.1B
+  parakeet-tdt_ctc-1.1b: Parakeet TDT-CTC 1.1B
+  parakeet-tdt-1.1b: Parakeet TDT 1.1B
+  silero-vad-v6.2: Silero VAD v6.2
+  Voxtral-Small-24B-2507: Voxtral Small 24B
+  whisper-base: Whisper Base
+  whisper-base.en: Whisper Base English
+  whisper-large: Whisper Large v1
+  whisper-large-v2: Whisper Large v2
+  whisper-medium.en: Whisper Medium English
+  whisper-small.en: Whisper Small English
+  whisper-tiny: Whisper Tiny
+  whisper-tiny.en: Whisper Tiny English

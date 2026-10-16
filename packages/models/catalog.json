@@ -33,7 +33,7 @@
   "models": [
     {
       "id": "parakeet-unified-en-0.6b",
-      "name": "Parakeet Unified EN 0.6B",
+      "name": "Parakeet Unified English 0.6B",
       "description": "Best all-around choice for English dictation",
       "repository": "handy-computer/parakeet-unified-en-0.6b-gguf",
       "revision": "7e948f21b7bdbac698d3318db9d350f1096f3b6c",
@@ -44,7 +44,7 @@
       "languages": [
         "en"
       ],
-      "capabilities": {"streaming": true, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": true, "translate": false, "languageDetection": false, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -102,7 +102,7 @@
         "ro-RO",
         "et-EE"
       ],
-      "capabilities": {"streaming": true, "translate": false, "languageDetection": true},
+      "capabilities": {"streaming": true, "translate": false, "languageDetection": true, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -134,7 +134,7 @@
         "es",
         "fr"
       ],
-      "capabilities": {"streaming": false, "translate": true, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": true, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -174,7 +174,7 @@
         "vi",
         "ko"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -299,7 +299,7 @@
         "yo",
         "zh"
       ],
-      "capabilities": {"streaming": false, "translate": true, "languageDetection": true},
+      "capabilities": {"streaming": false, "translate": true, "languageDetection": true, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -338,7 +338,7 @@
         "hi",
         "ko"
       ],
-      "capabilities": {"streaming": true, "translate": false, "languageDetection": true},
+      "capabilities": {"streaming": true, "translate": false, "languageDetection": true, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -389,7 +389,7 @@
         "el",
         "mt"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": true},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": true, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -440,7 +440,7 @@
         "sv",
         "uk"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": true},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": true, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -467,7 +467,7 @@
       "languages": [
         "en"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -523,7 +523,7 @@
         "hu",
         "mk"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": true},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": true, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -580,7 +580,7 @@
         "sl",
         "sv"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -631,7 +631,7 @@
         "ru",
         "uk"
       ],
-      "capabilities": {"streaming": false, "translate": true, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": true, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -658,7 +658,7 @@
       "languages": [
         "en"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -686,7 +686,7 @@
         "en",
         "ar"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -715,7 +715,7 @@
         "en",
         "ja"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -742,7 +742,7 @@
       "languages": [
         "ru"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -769,7 +769,7 @@
       "languages": [
         "ru"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -796,7 +796,7 @@
       "languages": [
         "en"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -828,7 +828,7 @@
         "pt",
         "ja"
       ],
-      "capabilities": {"streaming": false, "translate": true, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": true, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -855,7 +855,7 @@
       "languages": [
         "en"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -882,7 +882,7 @@
       "languages": [
         "en"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -898,7 +898,7 @@
     },
     {
       "id": "multitalker-parakeet-streaming-0.6b-v1",
-      "name": "Parakeet Multitalker EN",
+      "name": "Parakeet Multitalker English",
       "description": "For overlapping speakers in meetings, not for solo dictation",
       "repository": "handy-computer/multitalker-parakeet-streaming-0.6b-v1-gguf",
       "revision": "a9a7208d8f205b5816770a6f7fb83afc81a7691b",
@@ -912,7 +912,7 @@
       "languages": [
         "en"
       ],
-      "capabilities": {"streaming": true, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": true, "translate": false, "languageDetection": false, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -968,7 +968,7 @@
         "hu",
         "mk"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": true},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": true, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -999,7 +999,7 @@
         "ja",
         "ko"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": true},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": true, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -1033,7 +1033,7 @@
         "nl",
         "hi"
       ],
-      "capabilities": {"streaming": false, "translate": true, "languageDetection": true},
+      "capabilities": {"streaming": false, "translate": true, "languageDetection": true, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -1158,7 +1158,7 @@
         "yo",
         "zh"
       ],
-      "capabilities": {"streaming": false, "translate": true, "languageDetection": true},
+      "capabilities": {"streaming": false, "translate": true, "languageDetection": true, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -1284,7 +1284,7 @@
         "yue",
         "zh"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": true},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": true, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -1311,7 +1311,7 @@
         "zh",
         "en"
       ],
-      "capabilities": {"streaming": false, "translate": true, "languageDetection": true},
+      "capabilities": {"streaming": false, "translate": true, "languageDetection": true, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -1437,7 +1437,7 @@
         "yue",
         "zh"
       ],
-      "capabilities": {"streaming": false, "translate": true, "languageDetection": true},
+      "capabilities": {"streaming": false, "translate": true, "languageDetection": true, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": true,
@@ -1468,7 +1468,7 @@
         "es",
         "fr"
       ],
-      "capabilities": {"streaming": false, "translate": true, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": true, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -1500,7 +1500,7 @@
         "es",
         "fr"
       ],
-      "capabilities": {"streaming": false, "translate": true, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": true, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -1516,7 +1516,7 @@
     },
     {
       "id": "diar_streaming_sortformer_4spk-v2.1",
-      "name": "Diar Streaming Sortformer 4spk V2.1",
+      "name": "Streaming Sortformer 4-Speaker v2.1",
       "description": "",
       "repository": "handy-computer/diar_streaming_sortformer_4spk-v2.1-gguf",
       "revision": "ae4afbb5c3d33b71cf2dbf600022b655ee706dd0",
@@ -1527,7 +1527,7 @@
       "languages": [
         "en"
       ],
-      "capabilities": {"streaming": true, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": true, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "diarize",
       "curated": false,
@@ -1540,7 +1540,7 @@
     },
     {
       "id": "gigaam-v3-ctc",
-      "name": "Gigaam V3 CTC",
+      "name": "GigaAM v3 CTC",
       "description": "",
       "repository": "handy-computer/gigaam-v3-ctc-gguf",
       "revision": "c3c611444004820c21c3b68312a41c83c1e4813b",
@@ -1551,7 +1551,7 @@
       "languages": [
         "ru"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -1567,7 +1567,7 @@
     },
     {
       "id": "gigaam-v3-rnnt",
-      "name": "Gigaam V3 RNNT",
+      "name": "GigaAM v3 RNN-T",
       "description": "",
       "repository": "handy-computer/gigaam-v3-rnnt-gguf",
       "revision": "8f30356b4607ae2d79353ab7dc9e5eea6dc46b48",
@@ -1578,7 +1578,7 @@
       "languages": [
         "ru"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -1594,7 +1594,7 @@
     },
     {
       "id": "granite-4.0-1b-speech",
-      "name": "Granite 4.0 1B Speech",
+      "name": "Granite Speech 4.0 1B",
       "description": "",
       "repository": "handy-computer/granite-4.0-1b-speech-gguf",
       "revision": "5899f364fb5bc4bae48c54dec8489aff40b70253",
@@ -1610,7 +1610,7 @@
         "pt",
         "ja"
       ],
-      "capabilities": {"streaming": false, "translate": true, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": true, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -1641,7 +1641,7 @@
         "es",
         "pt"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -1672,7 +1672,7 @@
         "es",
         "pt"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -1688,7 +1688,7 @@
     },
     {
       "id": "granite-speech-5.0-470m-turboctc-nc",
-      "name": "Granite Speech 5.0 470M Turboctc Nc",
+      "name": "Granite Speech 5.0 470M TurboCTC (Non-Commercial)",
       "description": "",
       "repository": "handy-computer/granite-speech-5.0-470m-turboctc-nc-gguf",
       "revision": "fb8091e2c1e50ef67d3e795ee9f84d703343d7c5",
@@ -1699,7 +1699,7 @@
       "languages": [
         "en"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -1715,7 +1715,7 @@
     },
     {
       "id": "lang-id-voxlingua107-ecapa",
-      "name": "VoxLingua107 language detector",
+      "name": "VoxLingua107 Language ID",
       "description": "Shared spoken-language detector for multilingual transcription models",
       "repository": "handy-computer/lang-id-voxlingua107-ecapa-gguf",
       "revision": "41cf26039e317c6b8883bf0a61b0785dc663fc26",
@@ -1832,7 +1832,7 @@
         "yo",
         "zh"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "langid",
       "curated": false,
@@ -1856,7 +1856,7 @@
       "languages": [
         "en"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -1869,7 +1869,7 @@
     },
     {
       "id": "moonshine-base-ar",
-      "name": "Moonshine Base Ar",
+      "name": "Moonshine Base Arabic",
       "description": "",
       "repository": "handy-computer/moonshine-base-ar-gguf",
       "revision": "1ae85af52b16eac8bcebda0287e6195ed1956e86",
@@ -1880,7 +1880,7 @@
       "languages": [
         "ar"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -1893,7 +1893,7 @@
     },
     {
       "id": "moonshine-base-ja",
-      "name": "Moonshine Base Ja",
+      "name": "Moonshine Base Japanese",
       "description": "",
       "repository": "handy-computer/moonshine-base-ja-gguf",
       "revision": "aac5cfff17ae28b6f17ae790a3e309ae0ca5911c",
@@ -1904,7 +1904,7 @@
       "languages": [
         "ja"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -1917,7 +1917,7 @@
     },
     {
       "id": "moonshine-base-ko",
-      "name": "Moonshine Base Ko",
+      "name": "Moonshine Base Korean",
       "description": "",
       "repository": "handy-computer/moonshine-base-ko-gguf",
       "revision": "03813c71abe85b40cd0671d3cfa420e831d7e333",
@@ -1928,7 +1928,7 @@
       "languages": [
         "ko"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -1941,7 +1941,7 @@
     },
     {
       "id": "moonshine-base-uk",
-      "name": "Moonshine Base Uk",
+      "name": "Moonshine Base Ukrainian",
       "description": "",
       "repository": "handy-computer/moonshine-base-uk-gguf",
       "revision": "d6ec586909c5209c0c17243dc4f5e55164f85dfb",
@@ -1952,7 +1952,7 @@
       "languages": [
         "uk"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -1965,7 +1965,7 @@
     },
     {
       "id": "moonshine-base-vi",
-      "name": "Moonshine Base Vi",
+      "name": "Moonshine Base Vietnamese",
       "description": "",
       "repository": "handy-computer/moonshine-base-vi-gguf",
       "revision": "76ccec93f5854ae16d2dab72d5b762fe10c0df81",
@@ -1976,7 +1976,7 @@
       "languages": [
         "vi"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -1989,7 +1989,7 @@
     },
     {
       "id": "moonshine-base-zh",
-      "name": "Moonshine Base Zh",
+      "name": "Moonshine Base Chinese",
       "description": "",
       "repository": "handy-computer/moonshine-base-zh-gguf",
       "revision": "64385c681d79767be73ce8591b4609854ac750c9",
@@ -2000,7 +2000,7 @@
       "languages": [
         "zh"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -2024,7 +2024,7 @@
       "languages": [
         "en"
       ],
-      "capabilities": {"streaming": true, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": true, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -2048,7 +2048,7 @@
       "languages": [
         "en"
       ],
-      "capabilities": {"streaming": true, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": true, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -2072,7 +2072,7 @@
       "languages": [
         "en"
       ],
-      "capabilities": {"streaming": true, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": true, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -2096,7 +2096,7 @@
       "languages": [
         "en"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -2109,7 +2109,7 @@
     },
     {
       "id": "moonshine-tiny-ar",
-      "name": "Moonshine Tiny Ar",
+      "name": "Moonshine Tiny Arabic",
       "description": "",
       "repository": "handy-computer/moonshine-tiny-ar-gguf",
       "revision": "2360cb6893cb523da51875eaffc8050d2ca7b56d",
@@ -2120,7 +2120,7 @@
       "languages": [
         "ar"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -2133,7 +2133,7 @@
     },
     {
       "id": "moonshine-tiny-ja",
-      "name": "Moonshine Tiny Ja",
+      "name": "Moonshine Tiny Japanese",
       "description": "",
       "repository": "handy-computer/moonshine-tiny-ja-gguf",
       "revision": "627aae63193d6c47cbdf316346119dcdc65d9b0d",
@@ -2144,7 +2144,7 @@
       "languages": [
         "ja"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -2157,7 +2157,7 @@
     },
     {
       "id": "moonshine-tiny-ko",
-      "name": "Moonshine Tiny Ko",
+      "name": "Moonshine Tiny Korean",
       "description": "",
       "repository": "handy-computer/moonshine-tiny-ko-gguf",
       "revision": "b858a303948b69c8b2442f700e936a07ba5f64da",
@@ -2168,7 +2168,7 @@
       "languages": [
         "ko"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -2181,7 +2181,7 @@
     },
     {
       "id": "moonshine-tiny-uk",
-      "name": "Moonshine Tiny Uk",
+      "name": "Moonshine Tiny Ukrainian",
       "description": "",
       "repository": "handy-computer/moonshine-tiny-uk-gguf",
       "revision": "b4c991eb4223caa4de770843185476b0c86056b4",
@@ -2192,7 +2192,7 @@
       "languages": [
         "uk"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -2205,7 +2205,7 @@
     },
     {
       "id": "moonshine-tiny-vi",
-      "name": "Moonshine Tiny Vi",
+      "name": "Moonshine Tiny Vietnamese",
       "description": "",
       "repository": "handy-computer/moonshine-tiny-vi-gguf",
       "revision": "d97be0111a74a9058689beacc05b38969d2b68aa",
@@ -2216,7 +2216,7 @@
       "languages": [
         "vi"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -2229,7 +2229,7 @@
     },
     {
       "id": "moonshine-tiny-zh",
-      "name": "Moonshine Tiny Zh",
+      "name": "Moonshine Tiny Chinese",
       "description": "",
       "repository": "handy-computer/moonshine-tiny-zh-gguf",
       "revision": "2aca379ba0dc978d878b84b76231d5ba5550e738",
@@ -2240,7 +2240,7 @@
       "languages": [
         "zh"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -2255,9 +2255,11 @@
       "id": "MOSS-Transcribe-Diarize",
       "name": "MOSS Transcribe Diarize",
       "description": "",
-      "repository": "handy-computer/MOSS-Transcribe-Diarize-gguf",
-      "revision": "bfa3d24438711391d8713c6ab0efd6264527757c",
-      "previousRevisions": [],
+      "repository": "handy-computer/moss-transcribe-diarize-gguf",
+      "revision": "6fdfa33aed776bbb0ac11a1a9835634fe6d75dd7",
+      "previousRevisions": [
+        "bfa3d24438711391d8713c6ab0efd6264527757c"
+      ],
       "license": "apache-2.0",
       "family": "moss",
       "parameters": "909M",
@@ -2265,7 +2267,7 @@
         "en",
         "zh"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -2281,7 +2283,7 @@
     },
     {
       "id": "nemotron-speech-streaming-en-0.6b",
-      "name": "Nemotron Speech Streaming EN 0.6B",
+      "name": "Nemotron Speech Streaming English 0.6B",
       "description": "",
       "repository": "handy-computer/nemotron-speech-streaming-en-0.6b-gguf",
       "revision": "7d9b719206789e4068d87c6398262ab4dfd4e45d",
@@ -2292,7 +2294,7 @@
       "languages": [
         "en"
       ],
-      "capabilities": {"streaming": true, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": true, "translate": false, "languageDetection": false, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -2343,7 +2345,7 @@
         "sv",
         "uk"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": true},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": true, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -2370,7 +2372,7 @@
       "languages": [
         "en"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -2397,7 +2399,7 @@
       "languages": [
         "en"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -2448,7 +2450,7 @@
         "sv",
         "uk"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": true},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": true, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -2464,7 +2466,7 @@
     },
     {
       "id": "parakeet-rnnt-0.6b",
-      "name": "Parakeet RNNT 0.6B",
+      "name": "Parakeet RNN-T 0.6B",
       "description": "",
       "repository": "handy-computer/parakeet-rnnt-0.6b-gguf",
       "revision": "6001ebcc1c64dd821cf70b7b4ffdd4d18097760a",
@@ -2475,7 +2477,7 @@
       "languages": [
         "en"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -2491,7 +2493,7 @@
     },
     {
       "id": "parakeet-rnnt-1.1b",
-      "name": "Parakeet RNNT 1.1B",
+      "name": "Parakeet RNN-T 1.1B",
       "description": "",
       "repository": "handy-computer/parakeet-rnnt-1.1b-gguf",
       "revision": "58c3f5108699a6aba6d6dbb21f8fa153fe7d3f62",
@@ -2502,7 +2504,7 @@
       "languages": [
         "en"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -2518,7 +2520,7 @@
     },
     {
       "id": "parakeet-tdt_ctc-1.1b",
-      "name": "Parakeet TDT CTC 1.1B",
+      "name": "Parakeet TDT-CTC 1.1B",
       "description": "",
       "repository": "handy-computer/parakeet-tdt_ctc-1.1b-gguf",
       "revision": "f1ea20171bfb7a1741e8b695d02e0a9bb2855996",
@@ -2529,7 +2531,7 @@
       "languages": [
         "en"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -2556,7 +2558,7 @@
       "languages": [
         "en"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -2572,7 +2574,7 @@
     },
     {
       "id": "silero-vad-v6.2",
-      "name": "Silero VAD V6.2",
+      "name": "Silero VAD v6.2",
       "description": "",
       "repository": "handy-computer/silero-vad-v6.2-gguf",
       "revision": "97bbd75179f535e4708bccdf61e9278b8b60dfc7",
@@ -2581,7 +2583,7 @@
       "family": "silero_vad",
       "parameters": "0M",
       "languages": [],
-      "capabilities": {"streaming": true, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": true, "translate": false, "languageDetection": false, "timestamps": false},
       "quant": "F32",
       "role": "vad",
       "curated": false,
@@ -2592,7 +2594,7 @@
     },
     {
       "id": "Voxtral-Small-24B-2507",
-      "name": "Voxtral Small 24B 2507",
+      "name": "Voxtral Small 24B",
       "description": "",
       "repository": "handy-computer/Voxtral-Small-24B-2507-gguf",
       "revision": "3b85044238d7d73b0063c54ee6d0754b5f061795",
@@ -2610,7 +2612,7 @@
         "nl",
         "hi"
       ],
-      "capabilities": {"streaming": false, "translate": true, "languageDetection": true},
+      "capabilities": {"streaming": false, "translate": true, "languageDetection": true, "timestamps": false},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -2735,7 +2737,7 @@
         "yo",
         "zh"
       ],
-      "capabilities": {"streaming": false, "translate": true, "languageDetection": true},
+      "capabilities": {"streaming": false, "translate": true, "languageDetection": true, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -2751,7 +2753,7 @@
     },
     {
       "id": "whisper-base.en",
-      "name": "Whisper Base.en",
+      "name": "Whisper Base English",
       "description": "",
       "repository": "handy-computer/whisper-base.en-gguf",
       "revision": "cf0804db15fb341d00c9274b90da9cbb4fe2e5c6",
@@ -2762,7 +2764,7 @@
       "languages": [
         "en"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -2778,7 +2780,7 @@
     },
     {
       "id": "whisper-large",
-      "name": "Whisper Large",
+      "name": "Whisper Large v1",
       "description": "",
       "repository": "handy-computer/whisper-large-gguf",
       "revision": "1b99acc257d1a605153c9e4d818a065569a3fdcd",
@@ -2887,7 +2889,7 @@
         "yo",
         "zh"
       ],
-      "capabilities": {"streaming": false, "translate": true, "languageDetection": true},
+      "capabilities": {"streaming": false, "translate": true, "languageDetection": true, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -2903,7 +2905,7 @@
     },
     {
       "id": "whisper-large-v2",
-      "name": "Whisper Large V2",
+      "name": "Whisper Large v2",
       "description": "",
       "repository": "handy-computer/whisper-large-v2-gguf",
       "revision": "b64d145562182428ef04ca992b182aec8c61e578",
@@ -3012,7 +3014,7 @@
         "yo",
         "zh"
       ],
-      "capabilities": {"streaming": false, "translate": true, "languageDetection": true},
+      "capabilities": {"streaming": false, "translate": true, "languageDetection": true, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -3028,7 +3030,7 @@
     },
     {
       "id": "whisper-medium.en",
-      "name": "Whisper Medium.en",
+      "name": "Whisper Medium English",
       "description": "",
       "repository": "handy-computer/whisper-medium.en-gguf",
       "revision": "f25c70d9095dcfdad187ebb3b113d157b414aee8",
@@ -3039,7 +3041,7 @@
       "languages": [
         "en"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -3055,7 +3057,7 @@
     },
     {
       "id": "whisper-small.en",
-      "name": "Whisper Small.en",
+      "name": "Whisper Small English",
       "description": "",
       "repository": "handy-computer/whisper-small.en-gguf",
       "revision": "41b0f75fd44415ba127a5356c5ba9ed450c1debd",
@@ -3066,7 +3068,7 @@
       "languages": [
         "en"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -3191,7 +3193,7 @@
         "yo",
         "zh"
       ],
-      "capabilities": {"streaming": false, "translate": true, "languageDetection": true},
+      "capabilities": {"streaming": false, "translate": true, "languageDetection": true, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
@@ -3207,7 +3209,7 @@
     },
     {
       "id": "whisper-tiny.en",
-      "name": "Whisper Tiny.en",
+      "name": "Whisper Tiny English",
       "description": "",
       "repository": "handy-computer/whisper-tiny.en-gguf",
       "revision": "becb8bcb804405dc97b380a523d9975888820986",
@@ -3218,7 +3220,7 @@
       "languages": [
         "en"
       ],
-      "capabilities": {"streaming": false, "translate": false, "languageDetection": false},
+      "capabilities": {"streaming": false, "translate": false, "languageDetection": false, "timestamps": true},
       "quant": "Q8_0",
       "role": "asr",
       "curated": false,
