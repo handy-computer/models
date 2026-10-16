@@ -1,0 +1,196 @@
+# @handy-computer/models: check, update daily, publish.
+#
+#   pull_request / push   generate --check, tests, build
+#   schedule (daily)      move to the newest transcribe.cpp release, refresh
+#                         pins, regenerate. Changes that move no pick and touch
+#                         no curated download land on main and publish; anything
+#                         else opens (or refreshes) one PR for review. New models
+#                         that would be picked if curated get an issue each.
+#   push to main          publish to npm when package.json has a new version
+#
+# One-time setup (see packages/models/README.md):
+#   - Settings > Actions > General: "Allow GitHub Actions to create and approve
+#     pull requests".
+#   - npm: publish 0.1.0 by hand once, then add this workflow (models.yml) as
+#     the package's trusted publisher. Or set an NPM_TOKEN secret instead.
+#   - Optional HF_TOKEN secret for Hugging Face rate limits.
+
+name: models
+
+on:
+  schedule:
+    - cron: "23 7 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["packages/models/**", ".github/workflows/models.yml"]
+  pull_request:
+    paths: ["packages/models/**", ".github/workflows/models.yml"]
+
+concurrency:
+  group: models-${{ github.event_name == 'pull_request' && github.ref || 'main' }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: packages/models
+
+env:
+  TRANSCRIBE_CPP: ${{ github.workspace }}/../transcribe.cpp
+
+jobs:
+  check:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: packages/models/package-lock.json
+      - name: Fetch transcribe.cpp (tags and trees; catalog files on demand)
+        run: git clone -q --filter=blob:none --no-checkout https://github.com/handy-computer/transcribe.cpp "$TRANSCRIBE_CPP"
+      - run: npm ci
+      - name: catalog.json matches curation.yaml, pins.json and transcribe.cpp
+        run: npm run generate -- --check
+      - run: npm test
+      - run: npm run build
+
+  update:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    outputs:
+      landed: ${{ steps.land.outputs.landed }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      BRANCH: bot/models-catalog
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # Always main, even when dispatched from another branch: this job
+          # pushes to main and bases the review PR on it.
+          ref: main
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: packages/models/package-lock.json
+      - name: Fetch transcribe.cpp
+        run: git clone -q --filter=blob:none --no-checkout https://github.com/handy-computer/transcribe.cpp "$TRANSCRIBE_CPP"
+      - run: npm ci
+
+      - name: Update catalog
+        id: update
+        run: node scripts/update.ts --summary "$RUNNER_TEMP/summary.md" --candidates "$RUNNER_TEMP/candidates.json"
+
+      - name: Test the update
+        if: steps.update.outputs.changed == 'true'
+        run: |
+          npm test
+          npm run build
+          cat "$RUNNER_TEMP/summary.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Land on main
+        id: land
+        if: steps.update.outputs.changed == 'true' && steps.update.outputs.review == 'false'
+        env:
+          TITLE: ${{ steps.update.outputs.title }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add -A .
+          git commit -q -F - <<EOF
+          $TITLE
+
+          $(tail -n +3 "$RUNNER_TEMP/summary.md")
+          EOF
+          git push origin HEAD:main
+          echo "landed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Open or refresh the review PR
+        if: steps.update.outputs.changed == 'true' && steps.update.outputs.review == 'true'
+        env:
+          TITLE: ${{ steps.update.outputs.title }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git switch -q -c "$BRANCH"
+          git add -A .
+          git commit -q -m "$TITLE"
+          git push -q --force origin "$BRANCH"
+          {
+            cat "$RUNNER_TEMP/summary.md"
+            echo
+            echo "Tests passed in [the update run]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID). Merging publishes to npm."
+            echo "To decline, change curation.yaml or the method on main; closing this PR alone means it reopens tomorrow."
+          } > "$RUNNER_TEMP/body.md"
+          number=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')
+          if [ -n "$number" ]; then
+            gh pr edit "$number" --title "$TITLE" --body-file "$RUNNER_TEMP/body.md"
+          else
+            gh pr create --base main --head "$BRANCH" --title "$TITLE" --body-file "$RUNNER_TEMP/body.md"
+          fi
+
+      - name: Open curation-candidate issues
+        if: steps.update.outputs.changed == 'true'
+        run: |
+          jq -c '.[]' "$RUNNER_TEMP/candidates.json" | while read -r candidate; do
+            title=$(jq -r .title <<<"$candidate")
+            # Any issue with this title, open or closed: closing one means "no".
+            existing=$(gh issue list --state all --search "in:title \"$title\"" --json title --jq "map(select(.title == \"$title\")) | length")
+            if [ "$existing" = "0" ]; then
+              jq -r .body <<<"$candidate" > "$RUNNER_TEMP/issue.md"
+              gh issue create --title "$title" --body-file "$RUNNER_TEMP/issue.md"
+            fi
+          done
+
+  publish:
+    needs: [check, update]
+    if: >-
+      always() &&
+      ((github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.check.result == 'success') ||
+       needs.update.outputs.landed == 'true')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # The bot's commit when the update landed one; otherwise this push.
+          ref: ${{ needs.update.outputs.landed == 'true' && 'main' || github.sha }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: npm
+          cache-dependency-path: packages/models/package-lock.json
+      - name: Fetch transcribe.cpp
+        run: git clone -q --filter=blob:none --no-checkout https://github.com/handy-computer/transcribe.cpp "$TRANSCRIBE_CPP"
+      - run: npm ci
+      - name: Publish if this version is new
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          name=$(node -p "require('./package.json').name")
+          version=$(node -p "require('./package.json').version")
+          if npm view "$name@$version" version >/dev/null 2>&1; then
+            echo "$name@$version is already published."
+            exit 0
+          fi
+          # Trusted publishing needs npm 11.5.1 or newer.
+          npm install -g npm@11 --silent
+          npm publish --access public
+          echo "Published $name@$version." >> "$GITHUB_STEP_SUMMARY"

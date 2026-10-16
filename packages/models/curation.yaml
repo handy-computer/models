@@ -1,0 +1,130 @@
+# The one hand-edited file. Everything else in catalog.json is generated from
+# transcribe.cpp's catalog and the Hugging Face pins (`npm run generate`).
+#
+# Curated means: shown by default, eligible for recommendations, and given
+# editorial copy. Models not listed here remain in catalog.json as Published
+# (searchable, loadable, never recommended).
+
+# The transcribe.cpp release the facts and benchmarks come from. Use the
+# engine version the apps ship: benchmarks can change with engine behaviour.
+transcribeCpp: v0.4.0
+
+# Where recommendation numbers come from. Accuracy and the default download
+# are always the same quant, so a grade describes the file users get.
+benchmarks:
+  quant: Q8_0
+  accuracy: { dataset: fleurs, split: test }
+  speed:
+    accelerated: { machine: ryzen-4750u, backend: vulkan }
+    cpu: { machine: ryzen-4750u, backend: cpu }
+
+# See the Methodology comment in src/types.ts for what each value
+# means. Waits are quoted after a dictation of `dictationSeconds`.
+methodology:
+  dictationSeconds: 30
+  freeWaitSeconds: 3
+  waitWeight: 0.5
+  overallMaxWaitSeconds: 5
+  maxLanguageErrorPercent: 20
+  noteMinErrorPercent: 15
+  experimentalMaxErrorPercent: 30
+  fastCpuMaxWaitSeconds: 4
+  accurateMaxWaitSeconds: 10
+
+# Lets models without native detection offer Auto across the languages it
+# can identify. Recommendations depend on its language list.
+languageDetector:
+  id: lang-id-voxlingua107-ecapa
+  name: VoxLingua107 language detector
+  description: Shared spoken-language detector for multilingual transcription models
+
+# Curated models, keyed by Hugging Face repo name without "-gguf".
+# name is optional (defaults to a tidied id); description is required.
+models:
+  parakeet-unified-en-0.6b:
+    name: Parakeet Unified EN 0.6B
+    description: Best all-around choice for English dictation
+  nemotron-3.5-asr-streaming-0.6b:
+    name: Nemotron Streaming 3.5
+    description: Fast and accurate transcription in many European languages
+  canary-180m-flash:
+    name: Canary 180M Flash
+    description: Tiny, fast, and runs well on any hardware
+  cohere-transcribe-03-2026:
+    name: Cohere Transcribe
+    description: Consistently strong in many languages, best for Greek and Polish
+  whisper-medium:
+    name: Whisper Medium
+    description: Broadest language support, but may run a bit slow
+  Voxtral-Mini-4B-Realtime-2602:
+    name: Voxtral Mini 4B Realtime
+    description: Multilingual, very accurate in Italian and Spanish. Best on Apple Silicon or discrete GPUs
+  parakeet-ultra:
+    name: Parakeet Ultra
+    description: Best accuracy across 25 European languages
+  parakeet-tdt-0.6b-v3:
+    name: Parakeet TDT 0.6B v3
+    description: Fast and accurate, great overall multilingual pick
+  parakeet-tdt-0.6b-v2:
+    name: Parakeet TDT 0.6B v2
+    description: Excellent English only model, runs on any hardware
+  Qwen3-ASR-0.6B:
+    name: Qwen3-ASR 0.6B
+    description: Best for Chinese, Cantonese, and Asian languages with English
+  Fun-ASR-MLT-Nano-2512:
+    name: Fun-ASR Nano Multilingual
+    description: Best for Japanese, good at Thai, Indonesian, Malay
+  canary-1b-v2:
+    name: Canary 1B v2
+    description: Most accurate small model for European languages
+  canary-qwen-2.5b:
+    name: Canary-Qwen 2.5B
+    description: Very accurate English. Slow without a GPU.
+  cohere-transcribe-arabic-07-2026:
+    name: Cohere Transcribe Arabic
+    description: Best for Arabic and Arabic/English speakers
+  Fun-ASR-Nano-2512:
+    name: Fun-ASR Nano
+    description: Good for Mandarin, English, Japanese
+  gigaam-v3-e2e-ctc:
+    name: GigaAM v3 E2E-CTC
+    description: Russian only.
+  gigaam-v3-e2e-rnnt:
+    name: GigaAM v3 E2E-RNN-T
+    description: Best for Russian dictation. English may be unreliable.
+  granite-speech-5.0-470m-turboctc:
+    name: Granite Speech 5.0 470M TurboCTC
+    description: Extremely fast English transcription, best on GPU
+  granite-speech-4.1-2b:
+    name: Granite Speech 4.1 2B
+    description: Accurate with translation support. Best with GPU
+  medasr:
+    name: MedASR
+    description: For clinicians dictating notes. Poor on general speech
+  parakeet-tdt_ctc-110m:
+    name: Parakeet TDT-CTC 110M
+    description: Tiny English model, virtually instant even on CPU
+  multitalker-parakeet-streaming-0.6b-v1:
+    name: Parakeet Multitalker EN
+    description: For overlapping speakers in meetings, not for solo dictation
+  Qwen3-ASR-1.7B:
+    name: Qwen3-ASR 1.7B
+    description: Top accuracy across languages. Best on Apple Silicon or a GPU
+  SenseVoiceSmall:
+    name: SenseVoice Small
+    description: Instant Mandarin, Japanese, Korean on any machine. Weak Cantonese
+  Voxtral-Mini-3B-2507:
+    name: Voxtral Mini 3B
+    description: Accurate with translation support. Best on Apple Silicon or a GPU.
+  whisper-small:
+    name: Whisper Small
+    description: Wide language support in a relatively small model.
+  whisper-large-v3-turbo:
+    name: Whisper Large v3 Turbo
+    description: Accurate in many languages. Slow without a GPU
+  Breeze-ASR-25:
+    name: Breeze-ASR-25
+    description: Taiwan Mandarin with English mixed in. Traditional script, no punctuation
+  whisper-large-v3:
+    name: Whisper Large v3
+    description: Most languages at usable accuracy. Best on Apple Silicon or a GPU.

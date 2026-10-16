@@ -1,0 +1,43 @@
+{
+  "name": "@handy-computer/models",
+  "version": "0.1.0",
+  "description": "The curated transcribe.cpp model catalog and the recommendation method shared by Handy, Pi Voice, and models.handy.computer",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/handy-computer/models.handy.computer.git",
+    "directory": "packages/models"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./catalog.json": "./catalog.json"
+  },
+  "files": [
+    "dist",
+    "catalog.json",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20.10"
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json && node scripts/postbuild.mjs",
+    "check": "tsc --noEmit",
+    "test": "npm run check && node --test 'test/*.test.ts'",
+    "generate": "node scripts/generate.mjs",
+    "pins": "node scripts/generate.mjs --update-pins",
+    "snapshot": "node scripts/snapshot.ts",
+    "update": "node scripts/update.ts",
+    "prepublishOnly": "npm test && npm run generate -- --check && npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "typescript": "^5.9.3",
+    "yaml": "^2.8.1"
+  }
+}
