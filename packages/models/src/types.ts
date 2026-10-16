@@ -10,13 +10,6 @@ export type ModelFile = {
   readonly sha256: string;
 };
 
-/** A revision a model was pinned to before its current one. */
-export type PreviousRevision = {
-  readonly revision: string;
-  /** When the revision was committed on Hugging Face, ISO 8601 UTC. */
-  readonly date: string;
-};
-
 export type CatalogModel = {
   /** Hugging Face repo name without "-gguf", e.g. "Qwen3-ASR-0.6B". Stable. */
   readonly id: string;
@@ -28,10 +21,11 @@ export type CatalogModel = {
   /** Pinned commit; download from `resolve/<revision>/<filename>`. */
   readonly revision: string;
   /**
-   * Revisions shipped before `revision`, newest first. A download at one of
-   * these is an older version of this model; one at neither is not ours.
+   * Revisions shipped before `revision`, most recently replaced first. A
+   * download at one of these is an older version of this model; one at
+   * neither is not ours.
    */
-  readonly previousRevisions: readonly PreviousRevision[];
+  readonly previousRevisions: readonly string[];
   /** SPDX id, or "other". */
   readonly license: string;
   /** The loader architecture (the GGUF's general.architecture). */

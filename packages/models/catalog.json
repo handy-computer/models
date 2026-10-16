@@ -123,7 +123,7 @@
       "repository": "handy-computer/canary-180m-flash-gguf",
       "revision": "46b86384d1db59108d6e060a0fc00924cb58499f",
       "previousRevisions": [
-        {"revision": "b147f9dc52b59f0998e410540a84727bd86457fd", "date": "2026-06-28T13:16:42Z"}
+        "b147f9dc52b59f0998e410540a84727bd86457fd"
       ],
       "license": "cc-by-4.0",
       "family": "canary",
@@ -903,8 +903,8 @@
       "repository": "handy-computer/multitalker-parakeet-streaming-0.6b-v1-gguf",
       "revision": "a9a7208d8f205b5816770a6f7fb83afc81a7691b",
       "previousRevisions": [
-        {"revision": "31042fb4b5018be38240018492bdbde1923789dc", "date": "2026-07-30T08:55:28Z"},
-        {"revision": "0314bc0d2f4be9a0d79fa5eeb36ad1f3962cfcbb", "date": "2026-07-13T04:35:10Z"}
+        "31042fb4b5018be38240018492bdbde1923789dc",
+        "0314bc0d2f4be9a0d79fa5eeb36ad1f3962cfcbb"
       ],
       "license": "other",
       "family": "parakeet",
@@ -1457,7 +1457,7 @@
       "repository": "handy-computer/canary-1b-gguf",
       "revision": "9661a6a5a46f2f2cb6ff7062fef7b0fbbdb31498",
       "previousRevisions": [
-        {"revision": "f2eaa93b2221b6a28e5a00111a3e93f62964dff3", "date": "2026-06-28T13:16:48Z"}
+        "f2eaa93b2221b6a28e5a00111a3e93f62964dff3"
       ],
       "license": "cc-by-nc-4.0",
       "family": "canary",
@@ -1489,7 +1489,7 @@
       "repository": "handy-computer/canary-1b-flash-gguf",
       "revision": "bd27c7ef67ca6347ae2f729a130658466beecc85",
       "previousRevisions": [
-        {"revision": "b427664769b93c021df108a2fa8bfb858ae236c1", "date": "2026-06-28T13:16:45Z"}
+        "b427664769b93c021df108a2fa8bfb858ae236c1"
       ],
       "license": "cc-by-4.0",
       "family": "canary",

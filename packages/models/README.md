@@ -38,10 +38,9 @@ and verify `sha256`. `files` holds every published file, keyed by quant;
 `quant` names the default.
 
 `previousRevisions` lists the revisions this model was pinned to before
-`revision`, each with its Hugging Face commit `date`, newest first. It only
-ever grows. A download at one of them is
-an older version of the model, so an update exists; a download at neither
-isn't one the catalog ever shipped. What to do about either is the app's call.
+`revision`, most recently replaced first, and only ever grows. A download at
+one of them is an older version of the model, so an update exists; a
+download at neither isn't one the catalog ever shipped. What to do about either is the app's call.
 
 Rust (Handy) reads the same file: `@handy-computer/models/catalog.json`.
 Unknown fields can be ignored; the `schema` number changes on any breaking

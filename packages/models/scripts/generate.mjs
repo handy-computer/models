@@ -16,8 +16,7 @@
 // A pin only moves when the bytes change. The apps find downloads under
 // snapshots/<revision>/, so a new revision with identical files would make
 // every existing user download the model again. When it moves, the old
-// revision and its commit date join the pin's `previous` list, newest commit
-// first, which only grows:
+// revision joins the front of the pin's `previous` list, which only grows:
 // an app holding any revision we ever shipped can tell it is outdated rather
 // than unknown.
 //
@@ -223,12 +222,6 @@ async function resolvePin(repo, downloads, preferred) {
   throw new Error(`${repo}: no revision matches transcribe.cpp ${tag} (${head.mismatch})`);
 }
 
-/** When a revision was committed, to the second. */
-async function commitDate(repo, revision) {
-  const { lastModified } = await hf(`models/${repo}/revision/${revision}`);
-  return lastModified.replace(/\.\d+Z$/, "Z");
-}
-
 function pinMatches(pin, downloads) {
   return pin && downloads.every(({ filename, size_bytes }) => pin.files[filename]?.size === size_bytes);
 }
@@ -263,13 +256,7 @@ if (updatePins) {
           const was = pins[id];
           const preferred = [...new Set([was?.revision, ...(preferredRevisions.get(id) ?? [])].filter(Boolean))];
           const { revision, files } = await resolvePin(repo, record.downloads, preferred);
-          const moved = was && was.revision !== revision;
-          const previous = [
-            ...(moved ? [{ revision: was.revision, date: await commitDate(repo, was.revision) }] : []),
-            ...(was?.previous ?? []),
-          ]
-            .filter((old) => old.revision !== revision)
-            .sort((x, y) => y.date.localeCompare(x.date));
+          const previous = [...new Set([was?.revision, ...(was?.previous ?? [])])].filter((old) => old && old !== revision);
           pins[id] = { revision, ...(previous.length ? { previous } : {}), files };
           console.error(`pinned ${id} @ ${revision.slice(0, 12)}`);
         } catch (error) {
@@ -286,9 +273,8 @@ if (updatePins) {
 if (pinsBase) {
   const base = JSON.parse(readFileSync(resolve(pinsBase), "utf8"));
   const lost = Object.entries(base).flatMap(([id, pin]) => {
-    const known = (entry) => [entry?.revision, ...(entry?.previous ?? []).map((old) => old.revision)];
-    const kept = new Set(known(pins[id]));
-    return known(pin).filter((revision) => !kept.has(revision)).map((revision) => `${id} @ ${revision}`);
+    const kept = new Set([pins[id]?.revision, ...(pins[id]?.previous ?? [])]);
+    return [pin.revision, ...(pin.previous ?? [])].filter((revision) => !kept.has(revision)).map((revision) => `${id} @ ${revision}`);
   });
   if (lost.length) fail(`pins.json dropped revisions it once pinned:\n  ${lost.join("\n  ")}`);
 }
@@ -403,7 +389,7 @@ const catalog = {
 
 // One model field per line, small objects (cells, files, capabilities) inline.
 const text = `${JSON.stringify(catalog, null, 2).replace(
-  /\{\n\s+"(?:error|accelerated|cpu|streaming|filename|revision)":[^{}[\]]*?\n\s*\}/g,
+  /\{\n\s+"(?:error|accelerated|cpu|streaming|filename)":[^{}[\]]*?\n\s*\}/g,
   (block) => JSON.stringify(JSON.parse(block)).replaceAll('":', '": ').replaceAll(/,(?=")/g, ", "),
 )}\n`;
 const pinsText = `${JSON.stringify(Object.fromEntries(Object.entries(pins).sort(([a], [b]) => a.localeCompare(b))), null, 2)}\n`;

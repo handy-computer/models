@@ -29,16 +29,11 @@ test("every download is pinned and hashed, and the default file is one of them",
   }
 });
 
-test("previous revisions are distinct dated commits, newest first", () => {
+test("previous revisions are distinct commits other than the current one", () => {
   for (const model of ALL_MODELS) {
-    for (const { revision, date } of model.previousRevisions) {
-      assert.match(revision, /^[0-9a-f]{40}$/, model.id);
-      assert.match(date, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/, model.id);
-    }
-    const all = [model.revision, ...model.previousRevisions.map((old) => old.revision)];
+    for (const revision of model.previousRevisions) assert.match(revision, /^[0-9a-f]{40}$/, model.id);
+    const all = [model.revision, ...model.previousRevisions];
     assert.equal(new Set(all).size, all.length, model.id);
-    const dates = model.previousRevisions.map((old) => old.date);
-    assert.deepEqual(dates, [...dates].sort().reverse(), `${model.id} previous revisions out of order`);
   }
 });
 
