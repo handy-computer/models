@@ -5,9 +5,9 @@
 //
 //   lands on its own   new published models, benchmark numbers that move no
 //                      pick, changes to models that aren't curated
-//   needs review       any pick changes, or a curated model's download,
-//                      licence, languages, capabilities or minimum engine
-//                      changes, or a curated model disappears
+//   needs review       any pick changes, or a curated model's (or the language
+//                      detector's) download, licence, languages, capabilities
+//                      or minimum engine changes, or a curated model disappears
 //
 //   node scripts/update.ts [--transcribe-cpp <path>] [--summary <file>] [--candidates <file>]
 //
@@ -18,13 +18,14 @@
 import { execFileSync } from "node:child_process";
 import { appendFileSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { createCatalog } from "../src/create.ts";
 import { compareEngineVersions } from "../src/catalog.ts";
 import { languageIdentity } from "../src/languages.ts";
 import type { CatalogData, CatalogModel } from "../src/types.ts";
 import { describeChanges, type PickSnapshot, pickSnapshot } from "./picks.ts";
 
-const root = new URL("..", import.meta.url).pathname;
+const root = fileURLToPath(new URL("..", import.meta.url));
 const args = process.argv.slice(2);
 const option = (name: string) => {
   const index = args.indexOf(name);
@@ -91,8 +92,14 @@ const oldById = new Map(oldCatalog.models.map((model) => [model.id, model]));
 const newById = new Map(newCatalog.models.map((model) => [model.id, model]));
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 
+// The language detector isn't curated, but every app downloads it.
+const reviewedIds = new Set([
+  ...[...oldCatalog.models, ...newCatalog.models].filter((m) => m.curated).map((m) => m.id),
+  oldCatalog.languageDetector,
+  newCatalog.languageDetector,
+]);
 const curatedChanges: string[] = [];
-for (const id of new Set([...oldCatalog.models, ...newCatalog.models].filter((m) => m.curated).map((m) => m.id))) {
+for (const id of reviewedIds) {
   const [was, now] = [oldById.get(id), newById.get(id)];
   if (!now) {
     curatedChanges.push(`${id}: no longer published by transcribe.cpp`);

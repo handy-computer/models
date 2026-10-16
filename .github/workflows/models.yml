@@ -77,6 +77,10 @@ jobs:
       BRANCH: bot/models-catalog
     steps:
       - uses: actions/checkout@v5
+        with:
+          # Always main, even when dispatched from another branch: this job
+          # pushes to main and bases the review PR on it.
+          ref: main
       - uses: actions/setup-node@v5
         with:
           node-version: 22
@@ -154,8 +158,8 @@ jobs:
   publish:
     needs: [check, update]
     if: >-
-      always() && github.ref == 'refs/heads/main' &&
-      ((github.event_name == 'push' && needs.check.result == 'success') ||
+      always() &&
+      ((github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.check.result == 'success') ||
        needs.update.outputs.landed == 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 10

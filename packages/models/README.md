@@ -101,7 +101,7 @@ picks, bumps the patch version, and tests. Then:
 |---|---|
 | Nothing | nothing |
 | New published models, benchmark numbers that move no pick, uncurated models | lands on main and publishes to npm |
-| Any pick, or a curated model's download, licence, languages, capabilities or minimum engine | opens (or refreshes) one PR, `bot/models-catalog`, with the changes in words; merging publishes |
+| Any pick, or a curated model's (or the language detector's) download, licence, languages, capabilities or minimum engine | opens (or refreshes) one PR, `bot/models-catalog`, with the changes in words; merging publishes |
 | A new model that would be picked if curated | an issue per model with the evidence and the YAML to paste; close it to say no |
 
 PRs and pushes run `generate --check`, the tests and the build. A push to main

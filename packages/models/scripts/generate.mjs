@@ -169,7 +169,7 @@ async function hf(path) {
       await new Promise((done) => setTimeout(done, 1000 * 2 ** attempt));
       continue;
     }
-    throw new Error(`${response.status} ${response.statusText} for ${path}`);
+    throw Object.assign(new Error(`${response.status} ${response.statusText} for ${path}`), { status: response.status });
   }
 }
 
@@ -197,7 +197,12 @@ async function filesAt(repo, revision, downloads) {
  */
 async function resolvePin(repo, downloads, preferred) {
   for (const revision of preferred) {
-    const candidate = await filesAt(repo, revision, downloads).catch(() => ({ mismatch: true }));
+    // A revision the hub doesn't have is just not a candidate; any other
+    // failure must not quietly fall through to main.
+    const candidate = await filesAt(repo, revision, downloads).catch((error) => {
+      if (error.status === 404) return { mismatch: true };
+      throw error;
+    });
     if (!candidate.mismatch) return candidate;
   }
   const head = await filesAt(repo, "main", downloads);
