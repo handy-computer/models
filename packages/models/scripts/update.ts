@@ -13,7 +13,7 @@
 //
 // --candidates writes a JSON list of new models that would be picked if
 // curated ({ id, title, body }), so CI can open one issue per candidate.
-// Writes changed/review/title to $GITHUB_OUTPUT when set. Does not commit.
+// Writes changed/title to $GITHUB_OUTPUT when set. Does not commit.
 
 import { execFileSync } from "node:child_process";
 import { appendFileSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
@@ -65,7 +65,8 @@ if (compareEngineVersions(latest, current) > 0) {
 }
 
 // Pins only move for files that changed; then rebuild everything from them.
-// The bot's own pushes skip the check job, so guard the pin history here.
+// The bot's PRs (opened with GITHUB_TOKEN) skip the check job, so guard the
+// pin history here.
 const basePins = join(mkdtempSync(join(tmpdir(), "models-")), "pins.json");
 writeFileSync(basePins, before["pins.json"]!);
 run("node", ["scripts/generate.mjs", "--update-pins", "--transcribe-cpp", transcribeCpp, "--pins-base", basePins]);
@@ -84,7 +85,7 @@ writeFileSync(file("test/fixtures/picks.json"), `${JSON.stringify(newPicks, null
 
 const changedFiles = tracked.filter((name) => read(name) !== before[name]);
 if (changedFiles.length === 0) {
-  output({ changed: "false", review: "false", title: "" });
+  output({ changed: "false", title: "" });
   if (candidatesPath) writeFileSync(candidatesPath, "[]\n");
   console.log("Nothing changed.");
   process.exit(0);
@@ -226,7 +227,7 @@ const summary = `${lines.join("\n")}\n`;
 if (summaryPath) writeFileSync(summaryPath, summary);
 if (candidatesPath) writeFileSync(candidatesPath, `${JSON.stringify(candidates, null, 2)}\n`);
 console.log(summary);
-output({ changed: "true", review: String(review), title });
+output({ changed: "true", title });
 
 function output(values: Record<string, string>) {
   if (!process.env.GITHUB_OUTPUT) return;

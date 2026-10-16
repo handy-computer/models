@@ -47,11 +47,6 @@ export function rankCatalogModels(
   );
 }
 
-/**
- * What a catalog search runs against. Languages and capabilities are left
- * out on purpose: the pickers already scope and grade by language, and a
- * long haystack made short queries match nearly everything.
- */
 /** The model's default file, `files[quant]`: the benchmarked one for curated models. */
 export function modelFile(model: CatalogModel): ModelFile {
   const file = model.files[model.quant];
@@ -59,6 +54,11 @@ export function modelFile(model: CatalogModel): ModelFile {
   return file;
 }
 
+/**
+ * What a catalog search runs against. Languages and capabilities are left
+ * out on purpose: the pickers already scope and grade by language, and a
+ * long haystack made short queries match nearly everything.
+ */
 export function catalogModelSearchText(model: CatalogModel): string {
   return [model.id, model.name, model.family, model.parameters ?? ""].join(" ").toLowerCase();
 }
