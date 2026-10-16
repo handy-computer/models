@@ -1,5 +1,5 @@
 import { canonicalLanguage, languageIdentity, resolveModelLanguage } from "./languages.ts";
-import type { CatalogModel } from "./types.ts";
+import type { CatalogModel, ModelFile } from "./types.ts";
 
 const languageNames = new Intl.DisplayNames(["en"], { type: "language" });
 
@@ -52,6 +52,13 @@ export function rankCatalogModels(
  * out on purpose: the pickers already scope and grade by language, and a
  * long haystack made short queries match nearly everything.
  */
+/** The model's default file, `files[quant]`: the benchmarked one for curated models. */
+export function modelFile(model: CatalogModel): ModelFile {
+  const file = model.files[model.quant];
+  if (!file) throw new Error(`${model.id} has no ${model.quant} file`);
+  return file;
+}
+
 export function catalogModelSearchText(model: CatalogModel): string {
   return [model.id, model.name, model.family, model.parameters ?? ""].join(" ").toLowerCase();
 }

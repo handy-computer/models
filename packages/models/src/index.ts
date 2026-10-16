@@ -14,6 +14,7 @@ export {
   compareEngineVersions,
   displayLanguage,
   formatBinarySize,
+  modelFile,
   modelMatchesLanguage,
   modelsForEngine,
   rankCatalogModels,

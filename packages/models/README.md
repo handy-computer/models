@@ -20,7 +20,7 @@ saved setting that points at it keeps resolving through `getModel(id)`.
 ## Use
 
 ```ts
-import { recommend, CURATED_MODELS, getModel, languageAccuracyGrade, modelWaitSeconds,
+import { recommend, CURATED_MODELS, getModel, modelFile, languageAccuracyGrade, modelWaitSeconds,
   speedMeterLevel, autoLanguagePolicy, LANGUAGE_DETECTION_MODEL } from "@handy-computer/models";
 
 // Best/Fast/Accurate from the curated models this engine can load.
@@ -28,7 +28,7 @@ const picks = recommend(["en", "de"], { engineVersion: transcribeVersion() });
 for (const pick of picks) {
   pick.roles;          // ["best"], ["fast", "accurate"], ...
   pick.status;         // eligible | experimental | unsupported | unbenchmarked
-  const file = pick.model.files[pick.model.quant]!; // the default (benchmarked) file
+  const file = modelFile(pick.model); // the default (benchmarked) file: files[quant]
   pick.model.repository, pick.model.revision, file.filename, file.size, file.sha256;
 }
 ```
