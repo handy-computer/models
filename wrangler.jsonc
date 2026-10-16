@@ -1,11 +1,14 @@
 {
   // Cloudflare Workers static assets, same shape as handy.computer.
-  // `bun run deploy` builds and uploads ./dist.
+  // `bun run deploy` builds and uploads ./dist. Wrangler runs the build
+  // itself before any deploy or version upload, so Cloudflare's branch
+  // builds (`wrangler versions upload`) have a ./dist too.
   "name": "models-handy-computer",
   "compatibility_date": "2026-08-01",
   // Serve at models.handy.computer. With custom_domain, `wrangler deploy`
   // creates the DNS record in the handy.computer zone on first deploy.
   "routes": [{ "pattern": "models.handy.computer", "custom_domain": true }],
+  "build": { "command": "bun run build" },
   "assets": {
     "directory": "./dist",
     "not_found_handling": "404-page"
