@@ -22,8 +22,9 @@ export type CatalogModel = {
   readonly revision: string;
   /**
    * Revisions shipped before `revision`, most recently replaced first. A
-   * download at one of these is an older version of this model; one at
-   * neither is not ours.
+   * download at one of these may have identical bytes after a relocation;
+   * compare hashes before treating it as a model update. One at neither
+   * is not a revision shipped by this catalog.
    */
   readonly previousRevisions: readonly string[];
   /** SPDX id, or "other". */

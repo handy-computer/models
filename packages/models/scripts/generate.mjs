@@ -13,12 +13,13 @@
 //   --pins-base <pins.json>          fail if a revision in that earlier pins.json
 //                                    is neither current nor previous here
 //
-// A pin only moves when the bytes change. The apps find downloads under
-// snapshots/<revision>/, so a new revision with identical files would make
-// every existing user download the model again. When it moves, the old
+// Pins normally stay put unless release filenames or sizes change. Explicit,
+// hash-verified relocations may also move a pin: a file's optional `filename`
+// records its new path, while its key remains the release's path. Revision-
+// based caches may need migration when a pin moves. When it moves, the old
 // revision joins the front of the pin's `previous` list, which only grows:
-// an app holding any revision we ever shipped can tell it is outdated rather
-// than unknown.
+// an app holding any revision we ever shipped can recognize it as previously
+// shipped rather than unknown (a relocation need not change model bytes).
 //
 // A public Hugging Face repo counts as released. A model whose repo is still
 // private is pinned with `"private": true` and left out of the catalog until
@@ -333,7 +334,8 @@ for (const { stem, blob, record } of records) {
   const files = {};
   for (const { quant: fileQuant, filename, size_bytes } of record.downloads) {
     if (fileQuant in files) problems.push(`${id}: two ${fileQuant} files`);
-    files[fileQuant] = { filename, size: size_bytes, sha256: pin.files[filename].sha256 };
+    const pinned = pin.files[filename];
+    files[fileQuant] = { filename: pinned.filename ?? filename, size: size_bytes, sha256: pinned.sha256 };
   }
   const defaultQuant = quant in files ? quant : Object.keys(files)[0];
   if (curated[id] && defaultQuant !== quant) problems.push(`${id}: curated but has no ${quant} file`);

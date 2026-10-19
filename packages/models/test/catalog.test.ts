@@ -30,6 +30,26 @@ test("every download is pinned and hashed, and the default file is one of them",
   }
 });
 
+test("Multitalker downloads use root paths without changing model bytes or engine requirements", () => {
+  const model = catalog.getModel("multitalker-parakeet-streaming-0.6b-v1")!;
+  assert.equal(model.revision, "d9ed2931bc10058f79809bd88139a27c2ef09a53");
+  assert.ok(model.previousRevisions.includes("a9a7208d8f205b5816770a6f7fb83afc81a7691b"));
+  assert.equal(model.minEngine, "0.2.4");
+  const hashes = {
+    F32: "1ae09d63777dc4ae061f1f92b8aa0f7336f51bd995860946cc1f120b7e010f16",
+    F16: "18116241c595891bccf44cd0207cd749e9ba9e6025ee73ab59606633ec730304",
+    Q8_0: "cf83cedc6777d2528a4d2a8a4bf476174ef7e5c65b86bc6c955f4cc9f5951ac5",
+    Q6_K: "d8db95ba257e370d910f42e8197dfc65fb5b879e09e4b13aefaac06af3555fa1",
+    Q5_K_M: "38c98bc0715ee95b4271952630661050a8c3c37f64b8b178c62b8b699668cbdb",
+    Q4_K_M: "d24307ac22e9e691c146a7e2339891638a44a8492a765e4b6c11cff8960cd998",
+  };
+  assert.equal(Object.keys(model.files).length, 6);
+  for (const [quant, sha256] of Object.entries(hashes)) {
+    assert.equal(model.files[quant]?.filename, `${model.id}-${quant}.gguf`);
+    assert.equal(model.files[quant]?.sha256, sha256);
+  }
+});
+
 test("previous revisions are distinct commits other than the current one", () => {
   for (const model of ALL_MODELS) {
     for (const revision of model.previousRevisions) assert.match(revision, /^[0-9a-f]{40}$/, model.id);
