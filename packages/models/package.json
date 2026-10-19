@@ -1,6 +1,6 @@
 {
   "name": "@handy-computer/models",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "The curated transcribe.cpp model catalog and the recommendation method shared by Handy, Pi Voice, and models.handy.computer",
   "type": "module",
   "license": "MIT",

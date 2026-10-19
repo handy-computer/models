@@ -39,8 +39,10 @@ and verify `sha256`. `files` holds every published file, keyed by quant;
 
 `previousRevisions` lists the revisions this model was pinned to before
 `revision`, most recently replaced first, and only ever grows. A download at
-one of them is an older version of the model, so an update exists; a
-download at neither isn't one the catalog ever shipped. What to do about either is the app's call.
+one of them was shipped before, but may contain identical model bytes (for
+example, after a file relocation). Compare hashes before treating it as a
+model update. A download at neither isn't one the catalog ever shipped.
+Cache reuse and migration are the app's responsibility.
 
 Rust (Handy) reads the same file: `@handy-computer/models/catalog.json`.
 Unknown fields can be ignored; the `schema` number changes on any breaking
@@ -62,7 +64,7 @@ model beats when processing a 30-second dictation on the benchmark GPU.
 
 ## curation.yaml
 
-The only hand-edited file. It holds:
+The hand-edited editorial configuration. It holds:
 
 - `transcribeCpp`: the transcribe.cpp release to build from. Use the engine
   version the apps ship; benchmarks can change with engine behaviour.
@@ -77,8 +79,8 @@ The only hand-edited file. It holds:
   it.
 
 Everything else (languages, capabilities, licence, files, sizes, benchmarks)
-comes from transcribe.cpp and is never written here. If a fact is wrong, fix
-it in transcribe.cpp.
+comes from transcribe.cpp. If a fact is wrong, fix it in transcribe.cpp.
+Byte-identical download relocations can be recorded in `pins.json` as described below.
 
 ## Updating
 
@@ -94,12 +96,20 @@ or `--transcribe-cpp`/`TRANSCRIBE_CPP`) at the tag in `curation.yaml`, and
 needs its tags. It is offline: Hugging Face is only contacted by `npm run
 pins`.
 
-`pins.json` is a lock file. A pin moves only when the bytes change: apps
-find downloads under `snapshots/<revision>/`, so a new revision with identical
-files would make every user download the model again. When transcribe.cpp
-re-uploads a model, `pins` picks the newest revision whose file sizes match
-the release and moves the old one to the pin's `previous` list. CI fails any
-change that drops a revision from `pins.json`.
+`pins.json` is a lock file. Automatic refresh keeps an existing pin while
+its file paths and sizes match the release. Otherwise it tries the existing
+and preferred revisions, then the newest matching revision. The old revision
+moves to the pin's `previous` list. CI fails any change that drops a revision.
+
+A byte-identical file relocation does not need an engine release. After
+verifying every relocated file's SHA-256 and size on Hugging Face, update the
+pin's `revision`, retain the old revision in `previous`, and add `filename`
+to each relocated file entry with its new repository-relative path. Keep the
+entry's key as the path from the engine release and keep its hash and size
+unchanged. Run `npm run generate` to emit the new download paths. Regular pin
+refresh preserves these entries; a later engine release with new paths can
+resolve them normally. Revision-based caches may need migration, but matching
+hashes mean the existing model bytes remain valid.
 
 When Hugging Face spells a repo differently from transcribe.cpp (after a
 rename or a case change, which only redirect), the pin records Hugging Face's
