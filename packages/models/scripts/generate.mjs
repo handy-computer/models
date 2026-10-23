@@ -378,11 +378,16 @@ for (const { stem, blob, record } of records) {
     accuracy[language] = { error: row.err_pct, ...(row.ci95?.[0] == null ? {} : { ciLower: row.ci95[0] }) };
   }
   const performance = {};
-  for (const [tier, rig] of Object.entries(curation.benchmarks.speed)) {
-    const runs = (record.speed_benchmarks ?? []).filter(
-      (row) => row.machine === rig.machine && row.backend === rig.backend && row.quant === defaultQuant,
-    );
-    if (runs.length) performance[tier] = Number(average(runs.map((row) => row.xrt_compute)).toFixed(3));
+  for (const [platform, tiers] of Object.entries(curation.benchmarks.platforms)) {
+    const speeds = {};
+    for (const [tier, rig] of Object.entries(tiers)) {
+      const runs = (record.speed_benchmarks ?? []).filter(
+        (row) => row.machine === rig.machine && row.backend === rig.backend && row.quant === defaultQuant,
+      );
+      if (runs.length) speeds[tier] = Number(average(runs.map((row) => row.xrt_compute)).toFixed(3));
+      else if (curated[id]) problems.push(`${id}: curated but has no ${defaultQuant} speed on ${rig.machine} ${rig.backend} (${platform} ${tier})`);
+    }
+    if (Object.keys(speeds).length) performance[platform] = speeds;
   }
   if (Object.keys(accuracy).length || Object.keys(performance).length) {
     benchmarks[id] = {
@@ -412,7 +417,7 @@ models.sort((a, b) => {
 });
 
 const catalog = {
-  schema: 2,
+  schema: 3,
   transcribeCpp: tag.replace(/^v/, ""),
   methodology: curation.methodology,
   benchmarks: curation.benchmarks,

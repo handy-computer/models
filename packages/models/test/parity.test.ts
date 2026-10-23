@@ -1,5 +1,6 @@
 // Proves the method moved from Pi Voice unchanged: this package's code, fed
-// Pi Voice's own data, makes exactly the picks Pi Voice's code makes.
+// Pi Voice's own data as the "other" platform (its rigs were the 4750U's),
+// makes exactly the picks Pi Voice's code makes.
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
@@ -24,22 +25,30 @@ function piVoiceCatalog(): CatalogData {
     files: {},
   });
   const detector = piVoiceData.languageDetector;
+  const { fastCpuMaxWaitSeconds, ...methodology } = piVoiceData.methodology;
+  const rig = { machine: "", backend: "" };
   return {
-    schema: 2,
+    schema: 3,
     transcribeCpp: "0.4.0",
-    methodology: piVoiceData.methodology,
-    benchmarks: {},
+    methodology: { ...methodology, fastMaxWaitSeconds: fastCpuMaxWaitSeconds },
+    benchmarks: {
+      quant: "Q8_0",
+      accuracy: { dataset: "fleurs", split: "test" },
+      platforms: { other: { accelerated: rig, cpu: rig }, "apple-silicon": { accelerated: rig } },
+    },
     languageDetector: detector.id,
     models: [
       ...piVoiceData.models.map((entry) => model(entry, "asr")),
       model({ id: detector.id, name: "detector", family: "", parameters: null, languages: detector.languages, capabilities: { streaming: false, translate: false, languageDetection: true } }, "langid"),
     ],
-    results: piVoiceData.results,
+    results: Object.fromEntries(
+      Object.entries(piVoiceData.results).map(([id, { accuracy, performance }]) => [id, { accuracy, performance: { other: performance } }]),
+    ),
   };
 }
 
 test("the package's code on Pi Voice's data reproduces every Pi Voice pick", () => {
-  const catalog = createCatalog(piVoiceCatalog());
+  const catalog = createCatalog(piVoiceCatalog()).forPlatform("other");
   const snapshot = pickSnapshot({
     models: catalog.curatedModels,
     recommendModels: catalog.recommendModels,

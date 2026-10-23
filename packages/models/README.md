@@ -20,11 +20,14 @@ saved setting that points at it keeps resolving through `getModel(id)`.
 ## Use
 
 ```ts
-import { recommend, CURATED_MODELS, getModel, modelFile, languageAccuracyGrade, modelWaitSeconds,
+import { forPlatform, CURATED_MODELS, getModel, modelFile, languageAccuracyGrade,
   speedMeterLevel, autoLanguagePolicy, LANGUAGE_DETECTION_MODEL } from "@handy-computer/models";
 
+// Speeds are judged on the platform the app runs on; the app says which.
+const models = forPlatform(isAppleSilicon ? "apple-silicon" : "other");
+
 // Best/Fast/Accurate from the curated models this engine can load.
-const picks = recommend(["en", "de"], { engineVersion: transcribeVersion() });
+const picks = models.recommend(["en", "de"], { engineVersion: transcribeVersion() });
 for (const pick of picks) {
   pick.roles;          // ["best"], ["fast", "accurate"], ...
   pick.status;         // eligible | experimental | unsupported | unbenchmarked
@@ -48,19 +51,49 @@ Rust (Handy) reads the same file: `@handy-computer/models/catalog.json`.
 Unknown fields can be ignored; the `schema` number changes on any breaking
 change.
 
-The functions Pi Voice had keep their names and behaviour (`recommendModels`,
-`benchmarkModels`, `frontierModelIds`, `accuracyGrade`, `languageAccuracyGrade`,
-`speedMeterLevel`, `modelWaitSeconds`, `getPreferredRecommendationLanguages`,
-`autoLanguagePolicy`, `undetectablePreferences`, `rankCatalogModels`, ...).
-`createCatalog(data)` binds them all to a different catalog, e.g. one fetched
-at runtime.
+### Platforms
+
+Accuracy is measured once and holds everywhere. Speed is not: a model that
+keeps a 4750U waiting is quick on Apple Silicon, so waits, the speed meter
+and the picks are judged on the reference machine of the platform the app runs
+on:
+
+| Platform | Reference | Best, Accurate, speed meter | Fast |
+|---|---|---|---|
+| `apple-silicon` | base Apple M4 | Metal | Metal |
+| `other` | AMD Ryzen 4750U | Vulkan | CPU |
+
+The app says which platform it is: `"apple-silicon"` on an arm64 Mac,
+`"other"` anywhere else, Intel Macs included. Check the hardware rather than
+the process: Node under Rosetta reports `x64` on an Apple Silicon Mac. In Rust,
+`cfg!(all(target_os = "macos", target_arch = "aarch64"))`.
+
+`forPlatform(platform)` returns everything the speeds touch (`recommend`,
+`recommendModels`, `benchmarkModels`, `getPreferredRecommendationLanguages`,
+`modelWaitSeconds`) along with everything that holds on every platform, so an
+app can keep just that object. The platform-independent half is also exported
+directly: `getModel`, `languageAccuracyGrade`, `autoLanguagePolicy`,
+`undetectablePreferences`, `ALL_MODELS`, `CURATED_MODELS`, ... .
+
+In `catalog.json`, `results[id].performance` holds real-time factors by
+platform, then tier: `{ "apple-silicon": { accelerated }, other: { accelerated,
+cpu } }`. `benchmarks.platforms` names the machine and backend behind each. A
+platform without a `cpu` tier judges Fast on `accelerated`.
+
+The rest of Pi Voice's functions keep their names and behaviour
+(`frontierModelIds`, `accuracyGrade`, `speedMeterLevel`, `autoLanguagePolicy`,
+`undetectablePreferences`, `rankCatalogModels`, ...); on the `other` platform
+the picks are exactly Pi Voice's. `createCatalog(data)` binds them all to a
+different catalog, e.g. one fetched at runtime; `.forPlatform()` works on it
+the same way.
 
 ### Grades and the speed meter
 
 Grades are on measured error at the benchmarked quant: A under 5%, B under
 10%, C under 20%, D under 30%, F beyond; each `+`/`-` step is a factor of
 ∛2. The speed meter counts how many of 1.5, 3, 5, 10 and 20 seconds the
-model beats when processing a 30-second dictation on the benchmark GPU.
+model beats when processing a 30-second dictation on the platform's
+accelerated benchmark.
 
 ## curation.yaml
 
@@ -68,7 +101,9 @@ The hand-edited editorial configuration. It holds:
 
 - `transcribeCpp`: the transcribe.cpp release to build from. Use the engine
   version the apps ship; benchmarks can change with engine behaviour.
-- `benchmarks`: which quant, dataset and machines the picks are judged on.
+- `benchmarks`: which quant and dataset the picks are judged on, and each
+  platform's reference machine and backends. Every curated model needs
+  every platform's speeds.
 - `methodology`: the recommendation thresholds.
 - `languageDetector`: the shared spoken-language detector.
 - `models`: the curated models, by Hugging Face repo name without `-gguf`,
@@ -87,7 +122,7 @@ Byte-identical download relocations can be recorded in `pins.json` as described 
 ```sh
 npm run pins       # after changing transcribeCpp: pin new or re-uploaded files
 npm run generate   # rebuild catalog.json from curation.yaml + transcribe.cpp + pins.json
-npm run snapshot   # print every pick that changed, and accept the new snapshot
+npm run snapshot   # print every pick that changed per platform, and accept the new snapshots
 npm test
 ```
 
@@ -160,4 +195,5 @@ One-time setup:
 
 `test/fixtures/pi-voice-picks.json` and `pi-voice-data.json` record Pi
 Voice's picks and data at the time of the move; `parity.test.ts` proves this
-code reproduces them exactly. `picks.json` is this package's own snapshot.
+code reproduces them exactly (as the `other` platform). `picks/<platform>.json`
+are this package's own snapshots, one per platform.

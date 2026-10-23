@@ -4,18 +4,16 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   accuracyGrade,
-  benchmarkModels,
   catalog,
   compareEngineVersions,
   CURATED_MODELS,
   EXPERIMENTAL_MAX_ERROR_PERCENT,
-  getPreferredRecommendationLanguages,
+  forPlatform,
+  getModel,
   languageAccuracyGrade,
   languageIdentity,
   modelsForEngine,
-  modelWaitSeconds,
-  recommend,
-  recommendModels,
+  type Platform,
   speedMeterLevel,
 } from "../src/index.ts";
 
@@ -24,75 +22,81 @@ const languages = [
   ...new Set(CURATED_MODELS.flatMap((model) => model.languages.map(languageIdentity))),
 ];
 
-test("every role is assigned and usable models never mix with fallback alternatives", () => {
-  for (const language of languages) {
-    for (const wanted of [[language], ["en", language]]) {
-      const picks = recommendModels(CURATED_MODELS, wanted);
-      assert.deepEqual(picks.flatMap((pick) => pick.roles).sort(), ALL_ROLES, wanted.join("+"));
-      if (picks.some((pick) => pick.status === "eligible")) {
-        assert.ok(picks.every((pick) => pick.status === "eligible" && !pick.overFloor));
-        assert.ok(
-          picks.every((pick) => pick.worstError! < catalog.methodology.maxLanguageErrorPercent),
-        );
-      } else {
-        assert.equal(picks.length, 1, "fallbacks carry all roles");
+// The method's invariants hold whichever platform's speeds it judges on.
+for (const platform of catalog.platforms) {
+  const { benchmarkModels, getPreferredRecommendationLanguages, recommend, recommendModels } =
+    forPlatform(platform);
+
+  test(`${platform}: every role is assigned and usable models never mix with fallback alternatives`, () => {
+    for (const language of languages) {
+      for (const wanted of [[language], ["en", language]]) {
+        const picks = recommendModels(CURATED_MODELS, wanted);
+        assert.deepEqual(picks.flatMap((pick) => pick.roles).sort(), ALL_ROLES, wanted.join("+"));
+        if (picks.some((pick) => pick.status === "eligible")) {
+          assert.ok(picks.every((pick) => pick.status === "eligible" && !pick.overFloor));
+          assert.ok(
+            picks.every((pick) => pick.worstError! < catalog.methodology.maxLanguageErrorPercent),
+          );
+        } else {
+          assert.equal(picks.length, 1, "fallbacks carry all roles");
+        }
       }
     }
-  }
-});
+  });
 
-test("language aliases produce identical recommendations", () => {
-  for (const [alias, canonical] of [["tl", "fil"], ["no", "nb"]] as const) {
-    assert.deepEqual(
-      recommendModels(CURATED_MODELS, ["en", alias]),
-      recommendModels(CURATED_MODELS, ["en", canonical]),
-    );
-  }
-});
-
-test("fallback statuses and preferred-language visibility follow the methodology", () => {
-  const preferred = new Set(getPreferredRecommendationLanguages(CURATED_MODELS));
-  for (const language of languages) {
-    const pick = recommendModels(CURATED_MODELS, [language])[0]!;
-    if (pick.error === undefined) assert.equal(pick.status, "unbenchmarked");
-    else if (pick.overFloor) {
-      const lower = catalog.data.results[pick.model.id]?.accuracy[pick.worstLanguage!]?.ciLower;
-      const experimental = pick.worstError! < EXPERIMENTAL_MAX_ERROR_PERCENT ||
-        (lower !== undefined && lower <= EXPERIMENTAL_MAX_ERROR_PERCENT);
-      assert.equal(pick.status, experimental ? "experimental" : "unsupported");
+  test(`${platform}: language aliases produce identical recommendations`, () => {
+    for (const [alias, canonical] of [["tl", "fil"], ["no", "nb"]] as const) {
+      assert.deepEqual(
+        recommendModels(CURATED_MODELS, ["en", alias]),
+        recommendModels(CURATED_MODELS, ["en", canonical]),
+      );
     }
-    assert.equal(preferred.has(language), ["eligible", "experimental"].includes(pick.status));
-  }
+  });
 
-  const unmeasured = { ...CURATED_MODELS[0]!, id: "unmeasured" };
-  assert.equal(recommendModels([unmeasured], ["en"])[0]?.status, "unbenchmarked");
-  assert.deepEqual(recommendModels([], ["en"]), []);
-  assert.deepEqual(recommend([]), [], "no languages, no picks");
-  assert.deepEqual(benchmarkModels(CURATED_MODELS, []), new Map());
-  assert.deepEqual(recommend(["xx"]), [], "a language no model speaks gets no picks");
-  assert.deepEqual(recommend(["en", "xx"]), []);
-});
+  test(`${platform}: fallback statuses and preferred-language visibility follow the methodology`, () => {
+    const preferred = new Set(getPreferredRecommendationLanguages(CURATED_MODELS));
+    for (const language of languages) {
+      const pick = recommendModels(CURATED_MODELS, [language])[0]!;
+      if (pick.error === undefined) assert.equal(pick.status, "unbenchmarked");
+      else if (pick.overFloor) {
+        const lower = catalog.data.results[pick.model.id]?.accuracy[pick.worstLanguage!]?.ciLower;
+        const experimental = pick.worstError! < EXPERIMENTAL_MAX_ERROR_PERCENT ||
+          (lower !== undefined && lower <= EXPERIMENTAL_MAX_ERROR_PERCENT);
+        assert.equal(pick.status, experimental ? "experimental" : "unsupported");
+      }
+      assert.equal(preferred.has(language), ["eligible", "experimental"].includes(pick.status));
+    }
 
-test("recommend() only picks curated models the engine can load", () => {
-  const published = catalog.models.filter((model) => model.role === "asr");
-  for (const language of ["en", "ko", "vi", "cy"]) {
-    for (const pick of recommend([language])) assert.ok(pick.model.curated, pick.model.id);
-  }
-  assert.ok(published.length > CURATED_MODELS.length, "the published tier is larger than the curated one");
+    const unmeasured = { ...CURATED_MODELS[0]!, id: "unmeasured" };
+    assert.equal(recommendModels([unmeasured], ["en"])[0]?.status, "unbenchmarked");
+    assert.deepEqual(recommendModels([], ["en"]), []);
+    assert.deepEqual(recommend([]), [], "no languages, no picks");
+    assert.deepEqual(benchmarkModels(CURATED_MODELS, []), new Map());
+    assert.deepEqual(recommend(["xx"]), [], "a language no model speaks gets no picks");
+    assert.deepEqual(recommend(["en", "xx"]), []);
+  });
 
-  assert.deepEqual(recommend(["en"], { engineVersion: "0.0.1" }), [], "an engine older than every model gets no picks");
-  // The curated model needing the newest engine is recommendable on that
-  // engine and never on the one before it.
-  const newest = [...CURATED_MODELS].sort((a, b) => compareEngineVersions(b.minEngine!, a.minEngine!))[0]!;
-  const language = newest.languages[0]!;
-  const inPool = (engineVersion: string) =>
-    modelsForEngine(CURATED_MODELS, engineVersion).some((model) => model.id === newest.id);
-  assert.ok(inPool(newest.minEngine!));
-  assert.ok(recommend([language], { engineVersion: newest.minEngine! }).length > 0);
-  const [major, minor, patch] = newest.minEngine!.split(".").map(Number) as [number, number, number];
-  const before = patch > 0 ? `${major}.${minor}.${patch - 1}` : minor > 0 ? `${major}.${minor - 1}.99` : `${major - 1}.99.99`;
-  assert.ok(!inPool(before), `${newest.id} needs ${newest.minEngine}, not ${before}`);
-});
+  test(`${platform}: recommend() only picks curated models the engine can load`, () => {
+    const published = catalog.models.filter((model) => model.role === "asr");
+    for (const language of ["en", "ko", "vi", "cy"]) {
+      for (const pick of recommend([language])) assert.ok(pick.model.curated, pick.model.id);
+    }
+    assert.ok(published.length > CURATED_MODELS.length, "the published tier is larger than the curated one");
+
+    assert.deepEqual(recommend(["en"], { engineVersion: "0.0.1" }), [], "an engine older than every model gets no picks");
+    // The curated model needing the newest engine is recommendable on that
+    // engine and never on the one before it.
+    const newest = [...CURATED_MODELS].sort((a, b) => compareEngineVersions(b.minEngine!, a.minEngine!))[0]!;
+    const language = newest.languages[0]!;
+    const inPool = (engineVersion: string) =>
+      modelsForEngine(CURATED_MODELS, engineVersion).some((model) => model.id === newest.id);
+    assert.ok(inPool(newest.minEngine!));
+    assert.ok(recommend([language], { engineVersion: newest.minEngine! }).length > 0);
+    const [major, minor, patch] = newest.minEngine!.split(".").map(Number) as [number, number, number];
+    const before = patch > 0 ? `${major}.${minor}.${patch - 1}` : minor > 0 ? `${major}.${minor - 1}.99` : `${major - 1}.99.99`;
+    assert.ok(!inPool(before), `${newest.id} needs ${newest.minEngine}, not ${before}`);
+  });
+}
 
 test("accuracy letters and modifiers change at the documented proportional boundaries", () => {
   const step = Math.cbrt(2);
@@ -124,5 +128,29 @@ test("speed bars distinguish all six measured levels and unmeasured speed", () =
     assert.equal(speedMeterLevel(boundary), 4 - index);
   }
   assert.equal(speedMeterLevel(100), 0);
-  assert.equal(modelWaitSeconds({ ...CURATED_MODELS[0]!, id: "unmeasured" }), undefined);
+  assert.equal(forPlatform("other").modelWaitSeconds({ ...CURATED_MODELS[0]!, id: "unmeasured" }), undefined);
+});
+
+test("each platform judges waits on its own reference machine", () => {
+  const model = getModel("parakeet-tdt-0.6b-v3")!;
+  const speeds = catalog.data.results[model.id]!.performance;
+  const [apple, other] = [forPlatform("apple-silicon"), forPlatform("other")];
+  assert.equal(apple.modelWaitSeconds(model), 30 / speeds["apple-silicon"]!.accelerated!);
+  assert.equal(other.modelWaitSeconds(model), 30 / speeds.other!.accelerated!);
+  assert.equal(other.modelWaitSeconds(model, "cpu"), 30 / speeds.other!.cpu!);
+  assert.ok(apple.modelWaitSeconds(model)! < other.modelWaitSeconds(model)!, "a base M4 on Metal outruns a 4750U on Vulkan");
+  // Apple Silicon has no CPU tier: every one has Metal, and Fast is judged on it.
+  assert.equal(apple.modelWaitSeconds(model, "cpu"), undefined);
+  for (const pick of apple.recommend(["en"])) {
+    assert.equal(pick.withinFastWaitTarget, pick.waitSeconds! <= catalog.methodology.fastMaxWaitSeconds, pick.model.id);
+  }
+  // Accuracy holds everywhere.
+  assert.deepEqual(apple.languageAccuracyGrade(model, "de"), other.languageAccuracyGrade(model, "de"));
+});
+
+test("a platform is bound once and must be one the catalog has speeds for", () => {
+  assert.deepEqual([...catalog.platforms].sort(), ["apple-silicon", "other"]);
+  assert.equal(forPlatform("apple-silicon"), forPlatform("apple-silicon"));
+  assert.equal(forPlatform("other").getModel, catalog.getModel, "the bound catalog carries the shared half");
+  assert.throws(() => forPlatform("windows" as Platform), /no benchmarks for platform windows/);
 });

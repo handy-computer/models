@@ -1,5 +1,5 @@
 {
-  "schema": 2,
+  "schema": 3,
   "transcribeCpp": "0.4.1",
   "methodology": {
     "dictationSeconds": 30,
@@ -9,7 +9,7 @@
     "maxLanguageErrorPercent": 20,
     "noteMinErrorPercent": 15,
     "experimentalMaxErrorPercent": 30,
-    "fastCpuMaxWaitSeconds": 4,
+    "fastMaxWaitSeconds": 4,
     "accurateMaxWaitSeconds": 10
   },
   "benchmarks": {
@@ -18,14 +18,22 @@
       "dataset": "fleurs",
       "split": "test"
     },
-    "speed": {
-      "accelerated": {
-        "machine": "ryzen-4750u",
-        "backend": "vulkan"
+    "platforms": {
+      "apple-silicon": {
+        "accelerated": {
+          "machine": "m4",
+          "backend": "metal"
+        }
       },
-      "cpu": {
-        "machine": "ryzen-4750u",
-        "backend": "cpu"
+      "other": {
+        "accelerated": {
+          "machine": "ryzen-4750u",
+          "backend": "vulkan"
+        },
+        "cpu": {
+          "machine": "ryzen-4750u",
+          "backend": "cpu"
+        }
       }
     }
   },
@@ -3267,7 +3275,10 @@
       "accuracy": {
         "en": {"error": 3.99, "ciLower": 3.6}
       },
-      "performance": {"accelerated": 25.28, "cpu": 13.955}
+      "performance": {
+        "apple-silicon": {"accelerated": 78.295},
+        "other": {"accelerated": 25.28, "cpu": 13.955}
+      }
     },
     "nemotron-3.5-asr-streaming-0.6b": {
       "accuracy": {
@@ -3300,7 +3311,10 @@
         "vi": {"error": 13.96, "ciLower": 13.09},
         "zh": {"error": 18.87, "ciLower": 17.82}
       },
-      "performance": {"accelerated": 17.135, "cpu": 10.59}
+      "performance": {
+        "apple-silicon": {"accelerated": 49.035},
+        "other": {"accelerated": 17.135, "cpu": 10.59}
+      }
     },
     "canary-180m-flash": {
       "accuracy": {
@@ -3309,7 +3323,10 @@
         "es": {"error": 6.54, "ciLower": 5.92},
         "fr": {"error": 8.53, "ciLower": 7.78}
       },
-      "performance": {"accelerated": 33.085, "cpu": 21.73}
+      "performance": {
+        "apple-silicon": {"accelerated": 77.465},
+        "other": {"accelerated": 33.085, "cpu": 21.73}
+      }
     },
     "cohere-transcribe-03-2026": {
       "accuracy": {
@@ -3328,7 +3345,10 @@
         "vi": {"error": 7.39, "ciLower": 6.8},
         "zh": {"error": 11.18, "ciLower": 10.19}
       },
-      "performance": {"accelerated": 8.095, "cpu": 4.31}
+      "performance": {
+        "apple-silicon": {"accelerated": 29.49},
+        "other": {"accelerated": 8.095, "cpu": 4.31}
+      }
     },
     "whisper-medium": {
       "accuracy": {
@@ -3415,7 +3435,10 @@
         "yo": {"error": 109, "ciLower": 106.23},
         "zh": {"error": 13.13, "ciLower": 11.97}
       },
-      "performance": {"accelerated": 4.085, "cpu": 1.925}
+      "performance": {
+        "apple-silicon": {"accelerated": 13.6},
+        "other": {"accelerated": 4.085, "cpu": 1.925}
+      }
     },
     "Voxtral-Mini-4B-Realtime-2602": {
       "accuracy": {
@@ -3433,7 +3456,10 @@
         "ru": {"error": 5.41, "ciLower": 4.95},
         "zh": {"error": 10.41, "ciLower": 9.32}
       },
-      "performance": {"accelerated": 0.76, "cpu": 0.585}
+      "performance": {
+        "apple-silicon": {"accelerated": 2.385},
+        "other": {"accelerated": 0.76, "cpu": 0.585}
+      }
     },
     "parakeet-ultra": {
       "accuracy": {
@@ -3463,7 +3489,10 @@
         "sv": {"error": 12.83, "ciLower": 12.09},
         "uk": {"error": 5.71, "ciLower": 5.2}
       },
-      "performance": {"accelerated": 23, "cpu": 13.29}
+      "performance": {
+        "apple-silicon": {"accelerated": 70.405},
+        "other": {"accelerated": 23, "cpu": 13.29}
+      }
     },
     "parakeet-tdt-0.6b-v3": {
       "accuracy": {
@@ -3493,13 +3522,19 @@
         "sv": {"error": 15.25, "ciLower": 14.38},
         "uk": {"error": 6.84, "ciLower": 6.25}
       },
-      "performance": {"accelerated": 25.065, "cpu": 13.655}
+      "performance": {
+        "apple-silicon": {"accelerated": 74.845},
+        "other": {"accelerated": 25.065, "cpu": 13.655}
+      }
     },
     "parakeet-tdt-0.6b-v2": {
       "accuracy": {
         "en": {"error": 4.11, "ciLower": 3.71}
       },
-      "performance": {"accelerated": 27.435, "cpu": 14.27}
+      "performance": {
+        "apple-silicon": {"accelerated": 84.815},
+        "other": {"accelerated": 27.435, "cpu": 14.27}
+      }
     },
     "Qwen3-ASR-0.6B": {
       "accuracy": {
@@ -3534,7 +3569,10 @@
         "yue": {"error": 7.91, "ciLower": 7.28},
         "zh": {"error": 7.57, "ciLower": 6.7}
       },
-      "performance": {"accelerated": 9.705, "cpu": 5.295}
+      "performance": {
+        "apple-silicon": {"accelerated": 26.37},
+        "other": {"accelerated": 9.705, "cpu": 5.295}
+      }
     },
     "Fun-ASR-MLT-Nano-2512": {
       "accuracy": {
@@ -3570,7 +3608,10 @@
         "yue": {"error": 8.39, "ciLower": 7.74},
         "zh": {"error": 7.33, "ciLower": 6.42}
       },
-      "performance": {"accelerated": 8.835, "cpu": 5.47}
+      "performance": {
+        "apple-silicon": {"accelerated": 25.825},
+        "other": {"accelerated": 8.835, "cpu": 5.47}
+      }
     },
     "canary-1b-v2": {
       "accuracy": {
@@ -3600,20 +3641,29 @@
         "sv": {"error": 9.74, "ciLower": 9.06},
         "uk": {"error": 10.58, "ciLower": 9.87}
       },
-      "performance": {"accelerated": 14.13, "cpu": 8.325}
+      "performance": {
+        "apple-silicon": {"accelerated": 42.805},
+        "other": {"accelerated": 14.13, "cpu": 8.325}
+      }
     },
     "canary-qwen-2.5b": {
       "accuracy": {
         "en": {"error": 3.58, "ciLower": 3.19}
       },
-      "performance": {"accelerated": 3.975, "cpu": 2.51}
+      "performance": {
+        "apple-silicon": {"accelerated": 12.64},
+        "other": {"accelerated": 3.975, "cpu": 2.51}
+      }
     },
     "cohere-transcribe-arabic-07-2026": {
       "accuracy": {
         "ar": {"error": 11.06, "ciLower": 9.62},
         "en": {"error": 4.88, "ciLower": 4.25}
       },
-      "performance": {"accelerated": 8.305, "cpu": 4.31}
+      "performance": {
+        "apple-silicon": {"accelerated": 29.31},
+        "other": {"accelerated": 8.305, "cpu": 4.31}
+      }
     },
     "Fun-ASR-Nano-2512": {
       "accuracy": {
@@ -3621,25 +3671,37 @@
         "ja": {"error": 8.5, "ciLower": 7.86},
         "zh": {"error": 8.59, "ciLower": 7.59}
       },
-      "performance": {"accelerated": 10.73, "cpu": 7.945}
+      "performance": {
+        "apple-silicon": {"accelerated": 32.87},
+        "other": {"accelerated": 10.73, "cpu": 7.945}
+      }
     },
     "gigaam-v3-e2e-ctc": {
       "accuracy": {
         "ru": {"error": 5.53, "ciLower": 5.01}
       },
-      "performance": {"accelerated": 33.91, "cpu": 18.225}
+      "performance": {
+        "apple-silicon": {"accelerated": 152.93},
+        "other": {"accelerated": 33.91, "cpu": 18.225}
+      }
     },
     "gigaam-v3-e2e-rnnt": {
       "accuracy": {
         "ru": {"error": 5.35, "ciLower": 4.85}
       },
-      "performance": {"accelerated": 14.73, "cpu": 10.675}
+      "performance": {
+        "apple-silicon": {"accelerated": 145.345},
+        "other": {"accelerated": 14.73, "cpu": 10.675}
+      }
     },
     "granite-speech-5.0-470m-turboctc": {
       "accuracy": {
         "en": {"error": 4.61, "ciLower": 4.19}
       },
-      "performance": {"accelerated": 22.865, "cpu": 17.24}
+      "performance": {
+        "apple-silicon": {"accelerated": 122.66},
+        "other": {"accelerated": 22.865, "cpu": 17.24}
+      }
     },
     "granite-speech-4.1-2b": {
       "accuracy": {
@@ -3650,25 +3712,37 @@
         "ja": {"error": 6.3, "ciLower": 5.75},
         "pt": {"error": 9.8, "ciLower": 9.08}
       },
-      "performance": {"accelerated": 4.615, "cpu": 2.775}
+      "performance": {
+        "apple-silicon": {"accelerated": 24.615},
+        "other": {"accelerated": 4.615, "cpu": 2.775}
+      }
     },
     "medasr": {
       "accuracy": {
         "en": {"error": 37.48, "ciLower": 35.83}
       },
-      "performance": {"accelerated": 71.26, "cpu": 25.865}
+      "performance": {
+        "apple-silicon": {"accelerated": 286.4},
+        "other": {"accelerated": 71.26, "cpu": 25.865}
+      }
     },
     "parakeet-tdt_ctc-110m": {
       "accuracy": {
         "en": {"error": 6.11, "ciLower": 5.59}
       },
-      "performance": {"accelerated": 76.455, "cpu": 50.03}
+      "performance": {
+        "apple-silicon": {"accelerated": 211.62},
+        "other": {"accelerated": 76.455, "cpu": 50.03}
+      }
     },
     "multitalker-parakeet-streaming-0.6b-v1": {
       "accuracy": {
         "en": {"error": 6.52, "ciLower": 5.95}
       },
-      "performance": {"accelerated": 26.345, "cpu": 13.415}
+      "performance": {
+        "apple-silicon": {"accelerated": 79.85},
+        "other": {"accelerated": 26.345, "cpu": 13.415}
+      }
     },
     "Qwen3-ASR-1.7B": {
       "accuracy": {
@@ -3703,7 +3777,10 @@
         "yue": {"error": 6.13, "ciLower": 5.55},
         "zh": {"error": 7.14, "ciLower": 6.26}
       },
-      "performance": {"accelerated": 4.085, "cpu": 2.47}
+      "performance": {
+        "apple-silicon": {"accelerated": 11.93},
+        "other": {"accelerated": 4.085, "cpu": 2.47}
+      }
     },
     "SenseVoiceSmall": {
       "accuracy": {
@@ -3713,7 +3790,10 @@
         "yue": {"error": 37.44, "ciLower": 36.69},
         "zh": {"error": 10.12, "ciLower": 9.16}
       },
-      "performance": {"accelerated": 27.69, "cpu": 19.735}
+      "performance": {
+        "apple-silicon": {"accelerated": 119.35},
+        "other": {"accelerated": 27.69, "cpu": 19.735}
+      }
     },
     "Voxtral-Mini-3B-2507": {
       "accuracy": {
@@ -3726,7 +3806,10 @@
         "nl": {"error": 6.57, "ciLower": 5.84},
         "pt": {"error": 3.84, "ciLower": 3.44}
       },
-      "performance": {"accelerated": 1.085, "cpu": 0.56}
+      "performance": {
+        "apple-silicon": {"accelerated": 4.11},
+        "other": {"accelerated": 1.085, "cpu": 0.56}
+      }
     },
     "whisper-small": {
       "accuracy": {
@@ -3813,7 +3896,10 @@
         "yo": {"error": 118.5, "ciLower": 114.83},
         "zh": {"error": 23.06, "ciLower": 21.79}
       },
-      "performance": {"accelerated": 11.695, "cpu": 5.86}
+      "performance": {
+        "apple-silicon": {"accelerated": 37.28},
+        "other": {"accelerated": 11.695, "cpu": 5.86}
+      }
     },
     "whisper-large-v3-turbo": {
       "accuracy": {
@@ -3901,14 +3987,20 @@
         "yue": {"error": 34.62, "ciLower": 33.41},
         "zh": {"error": 8.5, "ciLower": 7.65}
       },
-      "performance": {"accelerated": 3.095, "cpu": 1.43}
+      "performance": {
+        "apple-silicon": {"accelerated": 12.515},
+        "other": {"accelerated": 3.095, "cpu": 1.43}
+      }
     },
     "Breeze-ASR-25": {
       "accuracy": {
         "en": {"error": 4.14, "ciLower": 3.7},
         "zh": {"error": 8.1, "ciLower": 7.28}
       },
-      "performance": {"accelerated": 2.02, "cpu": 0.96}
+      "performance": {
+        "apple-silicon": {"accelerated": 7.605},
+        "other": {"accelerated": 2.02, "cpu": 0.96}
+      }
     },
     "whisper-large-v3": {
       "accuracy": {
@@ -3996,7 +4088,10 @@
         "yue": {"error": 22.06, "ciLower": 20.16},
         "zh": {"error": 7.98, "ciLower": 7.12}
       },
-      "performance": {"accelerated": 1.995, "cpu": 0.97}
+      "performance": {
+        "apple-silicon": {"accelerated": 7.41},
+        "other": {"accelerated": 1.995, "cpu": 0.97}
+      }
     },
     "canary-1b": {
       "accuracy": {
@@ -4005,7 +4100,10 @@
         "es": {"error": 6.06, "ciLower": 5.52},
         "fr": {"error": 7.44, "ciLower": 6.79}
       },
-      "performance": {"accelerated": 9.765, "cpu": 6.48}
+      "performance": {
+        "apple-silicon": {"accelerated": 22.99},
+        "other": {"accelerated": 9.765, "cpu": 6.48}
+      }
     },
     "canary-1b-flash": {
       "accuracy": {
@@ -4014,19 +4112,28 @@
         "es": {"error": 6.73, "ciLower": 5.99},
         "fr": {"error": 7.22, "ciLower": 6.47}
       },
-      "performance": {"accelerated": 15.48, "cpu": 8.85}
+      "performance": {
+        "apple-silicon": {"accelerated": 47.455},
+        "other": {"accelerated": 15.48, "cpu": 8.85}
+      }
     },
     "gigaam-v3-ctc": {
       "accuracy": {
         "ru": {"error": 8.42, "ciLower": 7.64}
       },
-      "performance": {"accelerated": 37.49, "cpu": 19.615}
+      "performance": {
+        "apple-silicon": {"accelerated": 154.7},
+        "other": {"accelerated": 37.49, "cpu": 19.615}
+      }
     },
     "gigaam-v3-rnnt": {
       "accuracy": {
         "ru": {"error": 8.07, "ciLower": 7.34}
       },
-      "performance": {"accelerated": 25.605, "cpu": 15.63}
+      "performance": {
+        "apple-silicon": {"accelerated": 148.095},
+        "other": {"accelerated": 25.605, "cpu": 15.63}
+      }
     },
     "granite-4.0-1b-speech": {
       "accuracy": {
@@ -4037,7 +4144,10 @@
         "ja": {"error": 6.44, "ciLower": 5.86},
         "pt": {"error": 9.6, "ciLower": 8.89}
       },
-      "performance": {"accelerated": 4.635, "cpu": 2.755}
+      "performance": {
+        "apple-silicon": {"accelerated": 24.615},
+        "other": {"accelerated": 4.635, "cpu": 2.755}
+      }
     },
     "granite-speech-4.1-2b-nar": {
       "accuracy": {
@@ -4047,7 +4157,10 @@
         "fr": {"error": 6.76, "ciLower": 6.02},
         "pt": {"error": 5.57, "ciLower": 5.12}
       },
-      "performance": {"accelerated": 3.995, "cpu": 2.145}
+      "performance": {
+        "apple-silicon": {"accelerated": 19.33},
+        "other": {"accelerated": 3.995, "cpu": 2.145}
+      }
     },
     "granite-speech-4.1-2b-plus": {
       "accuracy": {
@@ -4057,128 +4170,191 @@
         "fr": {"error": 8.82, "ciLower": 8.11},
         "pt": {"error": 10.61, "ciLower": 9.59}
       },
-      "performance": {"accelerated": 4.645, "cpu": 2.6}
+      "performance": {
+        "apple-silicon": {"accelerated": 23.455},
+        "other": {"accelerated": 4.645, "cpu": 2.6}
+      }
     },
     "granite-speech-5.0-470m-turboctc-nc": {
       "accuracy": {
         "en": {"error": 4.3, "ciLower": 3.86}
       },
-      "performance": {"accelerated": 22.825, "cpu": 17.25}
+      "performance": {
+        "apple-silicon": {"accelerated": 122.475},
+        "other": {"accelerated": 22.825, "cpu": 17.25}
+      }
     },
     "moonshine-base": {
       "accuracy": {
         "en": {"error": 12.25, "ciLower": 10.67}
       },
-      "performance": {"accelerated": 35.59, "cpu": 23.49}
+      "performance": {
+        "apple-silicon": {"accelerated": 40.21},
+        "other": {"accelerated": 35.59, "cpu": 23.49}
+      }
     },
     "moonshine-base-ar": {
       "accuracy": {
         "ar": {"error": 24.62, "ciLower": 21.58}
       },
-      "performance": {"accelerated": 17.94, "cpu": 11.005}
+      "performance": {
+        "apple-silicon": {"accelerated": 19.015},
+        "other": {"accelerated": 17.94, "cpu": 11.005}
+      }
     },
     "moonshine-base-ja": {
       "accuracy": {
         "ja": {"error": 11.11, "ciLower": 10.05}
       },
-      "performance": {"accelerated": 23.41, "cpu": 14.885}
+      "performance": {
+        "apple-silicon": {"accelerated": 25.605},
+        "other": {"accelerated": 23.41, "cpu": 14.885}
+      }
     },
     "moonshine-base-ko": {
       "accuracy": {
         "ko": {"error": 8.12, "ciLower": 6.89}
       },
-      "performance": {"accelerated": 17.47, "cpu": 11.22}
+      "performance": {
+        "apple-silicon": {"accelerated": 19.1},
+        "other": {"accelerated": 17.47, "cpu": 11.22}
+      }
     },
     "moonshine-base-uk": {
       "accuracy": {
         "uk": {"error": 14.38, "ciLower": 13.42}
       },
-      "performance": {"accelerated": 26.79, "cpu": 17.375}
+      "performance": {
+        "apple-silicon": {"accelerated": 30.27},
+        "other": {"accelerated": 26.79, "cpu": 17.375}
+      }
     },
     "moonshine-base-vi": {
       "accuracy": {
         "vi": {"error": 9.96, "ciLower": 9.25}
       },
-      "performance": {"accelerated": 23.93, "cpu": 15.035}
+      "performance": {
+        "apple-silicon": {"accelerated": 25.925},
+        "other": {"accelerated": 23.93, "cpu": 15.035}
+      }
     },
     "moonshine-base-zh": {
       "accuracy": {
         "zh": {"error": 17.79, "ciLower": 15.81}
       },
-      "performance": {"accelerated": 28.02, "cpu": 18.29}
+      "performance": {
+        "apple-silicon": {"accelerated": 31.145},
+        "other": {"accelerated": 28.02, "cpu": 18.29}
+      }
     },
     "moonshine-streaming-medium": {
       "accuracy": {
         "en": {"error": 7.87, "ciLower": 6.97}
       },
-      "performance": {"accelerated": 14.28, "cpu": 9.665}
+      "performance": {
+        "apple-silicon": {"accelerated": 26.03},
+        "other": {"accelerated": 14.28, "cpu": 9.665}
+      }
     },
     "moonshine-streaming-small": {
       "accuracy": {
         "en": {"error": 8.55, "ciLower": 7.84}
       },
-      "performance": {"accelerated": 21.77, "cpu": 13.535}
+      "performance": {
+        "apple-silicon": {"accelerated": 42.09},
+        "other": {"accelerated": 21.77, "cpu": 13.535}
+      }
     },
     "moonshine-streaming-tiny": {
       "accuracy": {
         "en": {"error": 18.18, "ciLower": 15.79}
       },
-      "performance": {"accelerated": 59.15, "cpu": 56.27}
+      "performance": {
+        "apple-silicon": {"accelerated": 95.955},
+        "other": {"accelerated": 59.15, "cpu": 56.27}
+      }
     },
     "moonshine-tiny": {
       "accuracy": {
         "en": {"error": 14.13, "ciLower": 12.44}
       },
-      "performance": {"accelerated": 60.43, "cpu": 41.32}
+      "performance": {
+        "apple-silicon": {"accelerated": 72.015},
+        "other": {"accelerated": 60.43, "cpu": 41.32}
+      }
     },
     "moonshine-tiny-ar": {
       "accuracy": {
         "ar": {"error": 26.7, "ciLower": 24.08}
       },
-      "performance": {"accelerated": 29.575, "cpu": 19.72}
+      "performance": {
+        "apple-silicon": {"accelerated": 33.11},
+        "other": {"accelerated": 29.575, "cpu": 19.72}
+      }
     },
     "moonshine-tiny-ja": {
       "accuracy": {
         "ja": {"error": 13.44, "ciLower": 12.64}
       },
-      "performance": {"accelerated": 41.175, "cpu": 27.015}
+      "performance": {
+        "apple-silicon": {"accelerated": 47.045},
+        "other": {"accelerated": 41.175, "cpu": 27.015}
+      }
     },
     "moonshine-tiny-ko": {
       "accuracy": {
         "ko": {"error": 9, "ciLower": 7.86}
       },
-      "performance": {"accelerated": 30.35, "cpu": 20.495}
+      "performance": {
+        "apple-silicon": {"accelerated": 33.88},
+        "other": {"accelerated": 30.35, "cpu": 20.495}
+      }
     },
     "moonshine-tiny-uk": {
       "accuracy": {
         "uk": {"error": 18.76, "ciLower": 17.7}
       },
-      "performance": {"accelerated": 44.96, "cpu": 30.715}
+      "performance": {
+        "apple-silicon": {"accelerated": 51.98},
+        "other": {"accelerated": 44.96, "cpu": 30.715}
+      }
     },
     "moonshine-tiny-vi": {
       "accuracy": {
         "vi": {"error": 13.37, "ciLower": 12.57}
       },
-      "performance": {"accelerated": 39.54, "cpu": 26.955}
+      "performance": {
+        "apple-silicon": {"accelerated": 44.9},
+        "other": {"accelerated": 39.54, "cpu": 26.955}
+      }
     },
     "moonshine-tiny-zh": {
       "accuracy": {
         "zh": {"error": 13.88, "ciLower": 12.83}
       },
-      "performance": {"accelerated": 42.93, "cpu": 28.42}
+      "performance": {
+        "apple-silicon": {"accelerated": 48.16},
+        "other": {"accelerated": 42.93, "cpu": 28.42}
+      }
     },
     "MOSS-Transcribe-Diarize": {
       "accuracy": {
         "en": {"error": 5.13, "ciLower": 4.57},
         "zh": {"error": 9.23, "ciLower": 8.2}
       },
-      "performance": {"accelerated": 3.065, "cpu": 1.57}
+      "performance": {
+        "apple-silicon": {"accelerated": 9.42},
+        "other": {"accelerated": 3.065, "cpu": 1.57}
+      }
     },
     "nemotron-speech-streaming-en-0.6b": {
       "accuracy": {
         "en": {"error": 6.43, "ciLower": 5.81}
       },
-      "performance": {"accelerated": 27.145, "cpu": 13.57}
+      "performance": {
+        "apple-silicon": {"accelerated": 80.16},
+        "other": {"accelerated": 27.145, "cpu": 13.57}
+      }
     },
     "orukeet": {
       "accuracy": {
@@ -4208,19 +4384,28 @@
         "sv": {"error": 13.26, "ciLower": 12.5},
         "uk": {"error": 6.53, "ciLower": 5.98}
       },
-      "performance": {"accelerated": 25.095, "cpu": 13.62}
+      "performance": {
+        "apple-silicon": {"accelerated": 75.14},
+        "other": {"accelerated": 25.095, "cpu": 13.62}
+      }
     },
     "parakeet-ctc-0.6b": {
       "accuracy": {
         "en": {"error": 5.53, "ciLower": 5.06}
       },
-      "performance": {"accelerated": 28.6, "cpu": 15.16}
+      "performance": {
+        "apple-silicon": {"accelerated": 100.79},
+        "other": {"accelerated": 28.6, "cpu": 15.16}
+      }
     },
     "parakeet-ctc-1.1b": {
       "accuracy": {
         "en": {"error": 5.61, "ciLower": 5.04}
       },
-      "performance": {"accelerated": 16.785, "cpu": 8.925}
+      "performance": {
+        "apple-silicon": {"accelerated": 62.14},
+        "other": {"accelerated": 16.785, "cpu": 8.925}
+      }
     },
     "parakeet-primeline": {
       "accuracy": {
@@ -4250,31 +4435,46 @@
         "sv": {"error": 16.42, "ciLower": 15.53},
         "uk": {"error": 8.11, "ciLower": 7.55}
       },
-      "performance": {"accelerated": 24.97, "cpu": 13.635}
+      "performance": {
+        "apple-silicon": {"accelerated": 74.055},
+        "other": {"accelerated": 24.97, "cpu": 13.635}
+      }
     },
     "parakeet-rnnt-0.6b": {
       "accuracy": {
         "en": {"error": 4.57, "ciLower": 4.13}
       },
-      "performance": {"accelerated": 27.1, "cpu": 14.845}
+      "performance": {
+        "apple-silicon": {"accelerated": 87.12},
+        "other": {"accelerated": 27.1, "cpu": 14.845}
+      }
     },
     "parakeet-rnnt-1.1b": {
       "accuracy": {
         "en": {"error": 4.45, "ciLower": 3.99}
       },
-      "performance": {"accelerated": 16.085, "cpu": 8.59}
+      "performance": {
+        "apple-silicon": {"accelerated": 56.64},
+        "other": {"accelerated": 16.085, "cpu": 8.59}
+      }
     },
     "parakeet-tdt_ctc-1.1b": {
       "accuracy": {
         "en": {"error": 4.68, "ciLower": 4.22}
       },
-      "performance": {"accelerated": 17.04, "cpu": 9.315}
+      "performance": {
+        "apple-silicon": {"accelerated": 56.235},
+        "other": {"accelerated": 17.04, "cpu": 9.315}
+      }
     },
     "parakeet-tdt-1.1b": {
       "accuracy": {
         "en": {"error": 4.24, "ciLower": 3.78}
       },
-      "performance": {"accelerated": 16.445, "cpu": 8.805}
+      "performance": {
+        "apple-silicon": {"accelerated": 58.21},
+        "other": {"accelerated": 16.445, "cpu": 8.805}
+      }
     },
     "Voxtral-Small-24B-2507": {
       "accuracy": {
@@ -4374,13 +4574,19 @@
         "yo": {"error": 103.28, "ciLower": 101.84},
         "zh": {"error": 36.21, "ciLower": 35.11}
       },
-      "performance": {"accelerated": 29.015, "cpu": 19.33}
+      "performance": {
+        "apple-silicon": {"accelerated": 95.025},
+        "other": {"accelerated": 29.015, "cpu": 19.33}
+      }
     },
     "whisper-base.en": {
       "accuracy": {
         "en": {"error": 7.6, "ciLower": 6.89}
       },
-      "performance": {"accelerated": 32.015, "cpu": 20.6}
+      "performance": {
+        "apple-silicon": {"accelerated": 101.135},
+        "other": {"accelerated": 32.015, "cpu": 20.6}
+      }
     },
     "whisper-large": {
       "accuracy": {
@@ -4467,7 +4673,10 @@
         "yo": {"error": 113.72, "ciLower": 111.14},
         "zh": {"error": 19.32, "ciLower": 18.03}
       },
-      "performance": {"accelerated": 2.005, "cpu": 0.96}
+      "performance": {
+        "apple-silicon": {"accelerated": 7.525},
+        "other": {"accelerated": 2.005, "cpu": 0.96}
+      }
     },
     "whisper-large-v2": {
       "accuracy": {
@@ -4554,19 +4763,28 @@
         "yo": {"error": 96, "ciLower": 95.28},
         "zh": {"error": 15.39, "ciLower": 14.02}
       },
-      "performance": {"accelerated": 2.01, "cpu": 0.96}
+      "performance": {
+        "apple-silicon": {"accelerated": 7.58},
+        "other": {"accelerated": 2.01, "cpu": 0.96}
+      }
     },
     "whisper-medium.en": {
       "accuracy": {
         "en": {"error": 4.88, "ciLower": 4.32}
       },
-      "performance": {"accelerated": 4.405, "cpu": 2.065}
+      "performance": {
+        "apple-silicon": {"accelerated": 14.685},
+        "other": {"accelerated": 4.405, "cpu": 2.065}
+      }
     },
     "whisper-small.en": {
       "accuracy": {
         "en": {"error": 6.14, "ciLower": 5.47}
       },
-      "performance": {"accelerated": 12.475, "cpu": 6.26}
+      "performance": {
+        "apple-silicon": {"accelerated": 39.55},
+        "other": {"accelerated": 12.475, "cpu": 6.26}
+      }
     },
     "whisper-tiny": {
       "accuracy": {
@@ -4653,13 +4871,19 @@
         "yo": {"error": 102.29, "ciLower": 101.01},
         "zh": {"error": 41.91, "ciLower": 40.85}
       },
-      "performance": {"accelerated": 43.09, "cpu": 39.755}
+      "performance": {
+        "apple-silicon": {"accelerated": 148.14},
+        "other": {"accelerated": 43.09, "cpu": 39.755}
+      }
     },
     "whisper-tiny.en": {
       "accuracy": {
         "en": {"error": 10.72, "ciLower": 9.89}
       },
-      "performance": {"accelerated": 47.48, "cpu": 41.22}
+      "performance": {
+        "apple-silicon": {"accelerated": 151.21},
+        "other": {"accelerated": 47.48, "cpu": 41.22}
+      }
     }
   }
 }

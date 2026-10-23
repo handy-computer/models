@@ -54,7 +54,8 @@ export type CatalogModel = {
 
 /**
  * The picks in plain words. Wait is the seconds after a dictation of
- * `dictationSeconds`, on the benchmark GPU unless said otherwise. When
+ * `dictationSeconds` on the platform's accelerated benchmark (see Platform)
+ * unless said otherwise. When
  * several languages were chosen, automatic switching is preferred, but a
  * usable manual model beats an automatic model over the error floor. Quality
  * is a hard constraint whenever any model stays under
@@ -62,8 +63,8 @@ export type CatalogModel = {
  * the lowest error plus wait penalty, where the first `freeWaitSeconds` cost
  * nothing and each second beyond costs `waitWeight` points; its
  * `overallMaxWaitSeconds` limit relaxes before quality does. The fast pick is
- * judged on the benchmark CPU: the most accurate usable model within
- * `fastCpuMaxWaitSeconds`, else the quickest usable model. The most accurate
+ * judged on the platform's Fast tier: the most accurate usable model within
+ * `fastMaxWaitSeconds`, else the quickest usable model. The most accurate
  * pick has the lowest error among usable models within
  * `accurateMaxWaitSeconds`, else the most accurate usable model. When no
  * usable model exists, the closest model carries every role. It remains
@@ -82,11 +83,40 @@ export type Methodology = {
   readonly maxLanguageErrorPercent: number;
   readonly noteMinErrorPercent: number;
   readonly experimentalMaxErrorPercent: number;
-  readonly fastCpuMaxWaitSeconds: number;
+  readonly fastMaxWaitSeconds: number;
   readonly accurateMaxWaitSeconds: number;
 };
 
+/**
+ * Where the app runs, for speed: accuracy is measured once and holds
+ * everywhere, but waits are judged on the platform's own reference machine.
+ * The app says which one it is (see forPlatform); an Intel Mac is "other".
+ */
+export type Platform = "apple-silicon" | "other";
+
+/**
+ * A platform's speed tiers. Every platform has `accelerated`, which Best,
+ * Accurate and the speed meter use. Fast is judged on `cpu` where the
+ * platform defines it (machines whose GPU may be weak or missing) and on
+ * `accelerated` where it doesn't (every Apple Silicon Mac has Metal).
+ */
 export type MachineTier = "accelerated" | "cpu";
+
+/** A reference machine and backend from transcribe.cpp's speed benchmarks. */
+export type BenchmarkRig = {
+  readonly machine: string;
+  readonly backend: string;
+};
+
+/** Where the recommendation numbers come from (curation.yaml `benchmarks`). */
+export type Benchmarks = {
+  /** Accuracy and the default download are always this quant. */
+  readonly quant: string;
+  readonly accuracy: { readonly dataset: string; readonly split: string };
+  readonly platforms: Readonly<
+    Record<Platform, { readonly accelerated: BenchmarkRig; readonly cpu?: BenchmarkRig }>
+  >;
+};
 
 export type AccuracyCell = {
   /** Word or character error, in percent. */
@@ -98,17 +128,19 @@ export type AccuracyCell = {
 export type ModelResults = {
   /** Keyed by language identity (see languageIdentity). */
   readonly accuracy: Readonly<Record<string, AccuracyCell>>;
-  /** Real-time factor on each benchmark tier. */
-  readonly performance: Readonly<Partial<Record<MachineTier, number>>>;
+  /** Real-time factor on each platform's benchmark tiers, where measured. */
+  readonly performance: Readonly<
+    Partial<Record<Platform, Readonly<Partial<Record<MachineTier, number>>>>>
+  >;
 };
 
 /** The shape of catalog.json. */
 export type CatalogData = {
-  readonly schema: 2;
+  readonly schema: 3;
   /** The transcribe.cpp release the facts and benchmarks come from. */
   readonly transcribeCpp: string;
   readonly methodology: Methodology;
-  readonly benchmarks: unknown;
+  readonly benchmarks: Benchmarks;
   /** Id of the shared spoken-language detector. */
   readonly languageDetector: string;
   /** Every published model: curated first, then the rest by id. */

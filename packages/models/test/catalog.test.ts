@@ -8,8 +8,10 @@ import {
   compareEngineVersions,
   CURATED_MODELS,
   LANGUAGE_DETECTION_MODEL,
+  type MachineTier,
   modelFile,
   modelsForEngine,
+  type Platform,
 } from "../src/index.ts";
 
 test("ids are unique and every result belongs to a model", () => {
@@ -58,13 +60,19 @@ test("previous revisions are distinct commits other than the current one", () =>
   }
 });
 
-test("curated models are transcription models with copy, the benchmarked quant, and results", () => {
+test("curated models are transcription models with copy, the benchmarked quant, and every platform's speeds", () => {
   assert.ok(CURATED_MODELS.length > 0);
   for (const model of CURATED_MODELS) {
     assert.equal(model.role, "asr");
     assert.ok(model.description, `${model.id} has no description`);
     assert.equal(model.quant, "Q8_0", model.id);
     assert.ok(catalog.data.results[model.id], `${model.id} has no benchmark results`);
+    for (const [platform, tiers] of Object.entries(catalog.data.benchmarks.platforms)) {
+      for (const tier of Object.keys(tiers)) {
+        const speed = catalog.data.results[model.id]?.performance[platform as Platform]?.[tier as MachineTier];
+        assert.ok(speed && speed > 0, `${model.id} has no ${platform} ${tier} speed`);
+      }
+    }
   }
   assert.ok(ALL_MODELS.some((model) => !model.curated && model.role === "asr"), "uncurated models stay published");
 });

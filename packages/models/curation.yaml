@@ -11,12 +11,21 @@ transcribeCpp: v0.4.1
 
 # Where recommendation numbers come from. Accuracy and the default download
 # are always the same quant, so a grade describes the file users get.
+# Accuracy holds everywhere; speed is judged per platform, on that platform's
+# reference machine. Best, Accurate and the speed meter use `accelerated`.
+# Fast uses `cpu` where a platform has one, else `accelerated`. Every curated
+# model needs every platform's speeds.
 benchmarks:
   quant: Q8_0
   accuracy: { dataset: fleurs, split: test }
-  speed:
-    accelerated: { machine: ryzen-4750u, backend: vulkan }
-    cpu: { machine: ryzen-4750u, backend: cpu }
+  platforms:
+    # A base M4. Every Apple Silicon Mac has Metal, so Fast is judged on it too.
+    apple-silicon:
+      accelerated: { machine: m4, backend: metal }
+    # Everything else, judged on a modest laptop: a Ryzen 4750U.
+    other:
+      accelerated: { machine: ryzen-4750u, backend: vulkan }
+      cpu: { machine: ryzen-4750u, backend: cpu }
 
 # See the Methodology comment in src/types.ts for what each value
 # means. Waits are quoted after a dictation of `dictationSeconds`.
@@ -28,7 +37,7 @@ methodology:
   maxLanguageErrorPercent: 20
   noteMinErrorPercent: 15
   experimentalMaxErrorPercent: 30
-  fastCpuMaxWaitSeconds: 4
+  fastMaxWaitSeconds: 4
   accurateMaxWaitSeconds: 10
 
 # Lets models without native detection offer Auto across the languages it

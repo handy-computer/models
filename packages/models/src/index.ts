@@ -3,7 +3,7 @@ import { createCatalog } from "./create.ts";
 import type { CatalogData } from "./types.ts";
 
 export type * from "./types.ts";
-export { createCatalog, type Catalog } from "./create.ts";
+export { createCatalog, type Catalog, type PlatformCatalog } from "./create.ts";
 export {
   canonicalLanguage,
   languageIdentity,
@@ -56,13 +56,15 @@ export const COMFORTABLE_REAL_TIME_FACTOR = catalog.comfortableRealTimeFactor;
 export const EXPERIMENTAL_MAX_ERROR_PERCENT = catalog.experimentalMaxErrorPercent;
 export const {
   getModel,
-  recommend,
-  recommendModels,
-  benchmarkModels,
-  getPreferredRecommendationLanguages,
   languageAccuracyGrade,
-  modelWaitSeconds,
   detectorLanguageCode,
   undetectablePreferences,
   autoLanguagePolicy,
 } = catalog;
+
+/**
+ * Picks, benchmarks and waits for the platform the app runs on, from the
+ * bundled catalog: `forPlatform("apple-silicon")` on an arm64 Mac, `"other"`
+ * anywhere else. Also carries everything above, so an app can hold just this.
+ */
+export const forPlatform = catalog.forPlatform;

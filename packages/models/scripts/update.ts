@@ -1,9 +1,9 @@
 // The daily update. Moves curation.yaml to the newest transcribe.cpp release,
-// refreshes pins, regenerates catalog.json and the picks snapshot, bumps the
+// refreshes pins, regenerates catalog.json and each platform's picks snapshot, bumps the
 // patch version, and writes a plain-words summary for the PR it goes out in.
 // Every change is a PR; the summary leads with what needs a closer look:
 //
-//   needs review       any pick changes, or a curated model's (or the language
+//   needs review       any pick changes on any platform, or a curated model's (or the language
 //                      detector's) download, licence, languages, capabilities
 //                      or minimum engine changes, or a curated model disappears
 //   needs a name       published models missing from `names` in curation.yaml
@@ -16,15 +16,15 @@
 // Writes changed/title to $GITHUB_OUTPUT when set. Does not commit.
 
 import { execFileSync } from "node:child_process";
-import { appendFileSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
-import { createCatalog } from "../src/create.ts";
+import { createCatalog, type PlatformCatalog } from "../src/create.ts";
 import { compareEngineVersions } from "../src/catalog.ts";
 import { languageIdentity } from "../src/languages.ts";
-import type { CatalogData, CatalogModel } from "../src/types.ts";
+import type { CatalogData, CatalogModel, Platform } from "../src/types.ts";
 import { describeChanges, type PickSnapshot, pickSnapshot } from "./picks.ts";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
@@ -39,16 +39,18 @@ const transcribeCpp = resolve(
 const summaryPath = option("--summary");
 const candidatesPath = option("--candidates");
 const file = (name: string) => resolve(root, name);
-const read = (name: string) => readFileSync(file(name), "utf8");
+const read = (name: string) => (existsSync(file(name)) ? readFileSync(file(name), "utf8") : "");
 const run = (command: string, commandArgs: string[], cwd = root) =>
   execFileSync(command, commandArgs, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "inherit"] });
 
 // ─── before ────────────────────────────────────────────────────────────────
 
-const tracked = ["curation.yaml", "pins.json", "catalog.json", "test/fixtures/picks.json"];
+const picksFile = (platform: string) => `test/fixtures/picks/${platform}.json`;
+const tracked = ["curation.yaml", "pins.json", "catalog.json"];
 const before = Object.fromEntries(tracked.map((name) => [name, read(name)]));
 const oldCatalog: CatalogData = JSON.parse(before["catalog.json"]!);
-const oldPicks: PickSnapshot = JSON.parse(before["test/fixtures/picks.json"]!);
+const oldPlatforms = Object.keys(oldCatalog.benchmarks.platforms);
+for (const platform of oldPlatforms) before[picksFile(platform)] = read(picksFile(platform));
 
 // ─── move to the newest release ────────────────────────────────────────────
 
@@ -73,15 +75,20 @@ run("node", ["scripts/generate.mjs", "--update-pins", "--transcribe-cpp", transc
 
 const newCatalog: CatalogData = JSON.parse(read("catalog.json"));
 const catalog = createCatalog(newCatalog);
-const snapshotOf = (bound: ReturnType<typeof createCatalog>) =>
+const snapshotOf = (bound: PlatformCatalog) =>
   pickSnapshot({
     models: bound.curatedModels,
     recommendModels: bound.recommendModels,
     getPreferredRecommendationLanguages: bound.getPreferredRecommendationLanguages,
     languageIdentity,
   });
-const newPicks = snapshotOf(catalog);
-writeFileSync(file("test/fixtures/picks.json"), `${JSON.stringify(newPicks, null, 1)}\n`);
+const newPicks = new Map(catalog.platforms.map((platform) => [platform, snapshotOf(catalog.forPlatform(platform))]));
+mkdirSync(file("test/fixtures/picks"), { recursive: true });
+for (const [platform, picks] of newPicks) {
+  if (!(picksFile(platform) in before)) before[picksFile(platform)] = read(picksFile(platform));
+  writeFileSync(file(picksFile(platform)), `${JSON.stringify(picks, null, 1)}\n`);
+  tracked.push(picksFile(platform));
+}
 
 const changedFiles = tracked.filter((name) => read(name) !== before[name]);
 if (changedFiles.length === 0) {
@@ -93,7 +100,14 @@ if (changedFiles.length === 0) {
 
 // ─── classify ──────────────────────────────────────────────────────────────
 
-const pickChanges = describeChanges(oldPicks, newPicks);
+// Each line names its platform: picks are judged on each platform's own speeds.
+const pickChanges = [...new Set([...oldPlatforms, ...catalog.platforms])].flatMap((platform) => {
+  const was = before[picksFile(platform)];
+  const now = newPicks.get(platform as Platform);
+  if (!now) return [`[${platform}] no longer a platform`];
+  if (!was) return [`[${platform}] new platform`];
+  return describeChanges(JSON.parse(was) as PickSnapshot, now).map((line) => `[${platform}] ${line}`);
+});
 const oldById = new Map(oldCatalog.models.map((model) => [model.id, model]));
 const newById = new Map(newCatalog.models.map((model) => [model.id, model]));
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
@@ -134,16 +148,19 @@ const otherChanged = newCatalog.models.filter((model) => {
   return was && !model.curated && (!same(was, model) || !same(oldCatalog.results[model.id], newCatalog.results[model.id]));
 });
 
-// How often each new model would be picked if it were curated: the case for
-// promoting it, so curating is a one-line decision.
-function wouldBePicked(model: CatalogModel): string[] {
+// Where each new model would be picked if it were curated, per platform: the
+// case for promoting it, so curating is a one-line decision.
+function wouldBePicked(model: CatalogModel): [Platform, string[]][] {
   if (model.role !== "asr" || !newCatalog.results[model.id]) return [];
   const promoted = createCatalog({
     ...newCatalog,
     models: newCatalog.models.map((entry) => (entry.id === model.id ? { ...entry, curated: true } : entry)),
   });
-  const picks = snapshotOf(promoted).picks;
-  return Object.keys(picks).filter((key) => picks[key]!.split(" ").includes(model.id));
+  return promoted.platforms.flatMap((platform) => {
+    const picks = snapshotOf(promoted.forPlatform(platform)).picks;
+    const keys = Object.keys(picks).filter((key) => picks[key]!.split(" ").includes(model.id));
+    return keys.length ? [[platform, keys] as [Platform, string[]]] : [];
+  });
 }
 
 // ─── version and summary ───────────────────────────────────────────────────
@@ -172,16 +189,18 @@ if (added.length) {
   lines.push("### New published models", "", "Searchable in apps, never recommended until added to `curation.yaml`.", "");
   for (const model of added) {
     const picked = wouldBePicked(model);
-    if (picked.length) {
+    const count = picked.reduce((sum, [, keys]) => sum + keys.length, 0);
+    const sets = `${count} language set${count === 1 ? "" : "s"}`;
+    if (count) {
       candidates.push({
         id: model.id,
         title: `Curation candidate: ${model.id}`,
         body: [
           `transcribe.cpp ${newCatalog.transcribeCpp} published \`${model.id}\` (${model.parameters ?? "?"} parameters, needs transcribe.cpp ${model.minEngine}).`,
           "",
-          `If curated, it would be picked for **${picked.length} language set${picked.length === 1 ? "" : "s"}**:`,
+          `If curated, it would be picked for **${sets}** across platforms:`,
           "",
-          picked.join(", "),
+          ...picked.map(([platform, keys]) => `- ${platform}: ${keys.join(", ")}`),
           "",
           "To curate it, add it to `packages/models/curation.yaml`, then run `npm run generate && npm run snapshot` and review the pick changes:",
           "",
@@ -195,8 +214,8 @@ if (added.length) {
         ].join("\n"),
       });
     }
-    const note = picked.length
-      ? ` — **would be picked for ${picked.length} language set${picked.length === 1 ? "" : "s"} if curated** (${cap(picked, 8).join(", ")})`
+    const note = count
+      ? ` — **would be picked for ${sets} if curated** (${picked.map(([platform, keys]) => `${platform}: ${cap(keys, 8).join(", ")}`).join("; ")})`
       : model.role === "asr" ? "" : ` (${model.role})`;
     lines.push(`- \`${model.id}\`, needs transcribe.cpp ${model.minEngine}${note}`);
   }

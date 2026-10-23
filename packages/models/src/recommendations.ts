@@ -1,18 +1,26 @@
 // The recommendation method, moved from Pi Voice (src/recommendations.ts at
-// earendil-works/pi-voice@b5b61b1) with its behaviour unchanged. The only
-// difference is that the benchmark data arrives as an argument instead of a
-// module-level import, so callers can bind any catalog (see createCatalog).
+// earendil-works/pi-voice@b5b61b1) with its behaviour unchanged on the
+// "other" platform. The benchmark data arrives as an argument instead of a
+// module-level import, so callers can bind any catalog (see createCatalog),
+// and speeds are read for the platform the app runs on.
 
 import { displayLanguage, modelMatchesLanguage, rankCatalogModels } from "./catalog.ts";
 import { type DetectorCodes, undetectablePreferences } from "./language-detection.ts";
 import { languageIdentity } from "./languages.ts";
-import type { AccuracyCell, CatalogModel, MachineTier, Methodology, ModelResults } from "./types.ts";
+import type { AccuracyCell, CatalogModel, MachineTier, Methodology, ModelResults, Platform } from "./types.ts";
 
-/** The data the method reads: thresholds, results, and the detector's languages. */
-export type RecommendationContext = {
+/** The data every platform shares: thresholds, results, and the detector's languages. */
+export type CatalogContext = {
   readonly methodology: Methodology;
   readonly results: Readonly<Record<string, ModelResults>>;
   readonly detectorCodes: DetectorCodes;
+};
+
+/** The data the method reads: the catalog, and whose speeds to judge waits on. */
+export type RecommendationContext = CatalogContext & {
+  readonly platform: Platform;
+  /** The tier the Fast role is judged on for this platform. */
+  readonly fastTier: MachineTier;
 };
 
 export type RecommendationRole = "best" | "fast" | "accurate";
@@ -29,9 +37,9 @@ export type ModelRecommendation = {
   status: RecommendationStatus;
   /** Geometric mean of the per-language error, in percent. */
   error?: number;
-  /** Seconds after the dictation on the benchmark GPU. */
+  /** Seconds after the dictation on the platform's accelerated benchmark. */
   waitSeconds?: number;
-  /** Whether this model meets the Fast role's wait target on the benchmark CPU. */
+  /** Whether this model meets the Fast role's wait target on the platform's Fast tier. */
   withinFastWaitTarget?: boolean;
   /** The chosen language this model handles worst. */
   worstLanguage?: string;
@@ -87,13 +95,17 @@ export function speedMeterLevel(processingSeconds: number): number {
   return SPEED_CUTOFF_SECONDS.filter((cutoff) => processingSeconds < cutoff).length;
 }
 
-/** Processing time for the display's reference recording on the benchmark tier. */
+/**
+ * Processing time for the display's reference recording on one of the
+ * platform's benchmark tiers; undefined where the platform has no such tier
+ * or the model was not measured on it.
+ */
 export function modelWaitSeconds(
   context: RecommendationContext,
   model: CatalogModel,
   tier: MachineTier = "accelerated",
 ): number | undefined {
-  const xrt = context.results[model.id]?.performance[tier];
+  const xrt = context.results[model.id]?.performance[context.platform]?.[tier];
   return xrt ? BENCHMARK_DICTATION_SECONDS / xrt : undefined;
 }
 
@@ -102,7 +114,7 @@ export function modelWaitSeconds(
  * no measurement for it (whether or not the model claims the language).
  */
 export function languageAccuracyGrade(
-  context: RecommendationContext,
+  context: CatalogContext,
   model: CatalogModel,
   language: string,
 ): AccuracyGrade | undefined {
@@ -128,10 +140,10 @@ type ScoredModel = {
   worstError: number;
   /** Lower confidence bound for that error, when the benchmark provides one. */
   worstCiLower: number | undefined;
-  /** Seconds after the dictation on the benchmark GPU. */
+  /** Seconds after the dictation on the platform's accelerated benchmark. */
   waitSeconds: number;
-  /** The same on the benchmark CPU, when measured. */
-  cpuWaitSeconds: number | undefined;
+  /** The same on the platform's Fast tier, when measured. */
+  fastWaitSeconds: number | undefined;
   /** Needs the language set by hand for this set of languages. */
   manual: boolean;
   score: number;
@@ -151,7 +163,8 @@ function scoreModels(
     if (!wanted.every((language) => modelMatchesLanguage(model, language))) continue;
     const data = context.results[model.id];
     const cells = wanted.map((language) => data?.accuracy[language]);
-    const xrt = data?.performance.accelerated;
+    const speed = data?.performance[context.platform];
+    const xrt = speed?.accelerated;
     if (!data || !xrt || cells.some((cell) => cell === undefined)) continue;
     const accuracyCells = cells as AccuracyCell[];
     const numericErrors = accuracyCells.map((cell) => cell.error);
@@ -160,7 +173,7 @@ function scoreModels(
         numericErrors.length,
     );
     const waitSeconds = method.dictationSeconds / xrt;
-    const cpuXrt = data.performance.cpu;
+    const fastXrt = speed?.[context.fastTier];
     const worstError = Math.max(...numericErrors);
     const worstIndex = numericErrors.indexOf(worstError);
     scored.push({
@@ -170,7 +183,7 @@ function scoreModels(
       worstError,
       worstCiLower: accuracyCells[worstIndex]!.ciLower,
       waitSeconds,
-      cpuWaitSeconds: cpuXrt ? method.dictationSeconds / cpuXrt : undefined,
+      fastWaitSeconds: fastXrt ? method.dictationSeconds / fastXrt : undefined,
       manual: wanted.length > 1 &&
         undetectablePreferences(context.detectorCodes, model, languages).length > 0,
       score: error + method.waitWeight * Math.max(0, waitSeconds - method.freeWaitSeconds),
@@ -183,7 +196,7 @@ function scoreModels(
 export type ModelBenchmark = {
   /** Geometric mean of the per-language error, in percent. */
   error: number;
-  /** Seconds after the benchmark dictation on the benchmark GPU. */
+  /** Seconds after the benchmark dictation on the platform's accelerated benchmark. */
   waitSeconds: number;
   /** Every chosen language is under the usability floor. */
   usable: boolean;
@@ -266,10 +279,10 @@ function lowest<T>(items: readonly T[], key: (item: T) => number): T | undefined
 /**
  * Overall, fast, and accurate picks. Every role is always assigned: when no
  * other model earns the fast or accurate role, the overall pick carries it,
- * so callers can rely on all three without special cases. The picks do not
- * depend on the machine: they are judged on the benchmark rig, and the Try
- * it step measures the real wait. No languages, or a language no model
- * speaks, gets no picks.
+ * so callers can rely on all three without special cases. The picks depend
+ * on the platform, not the user's exact machine: waits are judged on the
+ * platform's reference rig, and the Try it step measures the real wait. No
+ * languages, or a language no model speaks, gets no picks.
  */
 export function recommendModels(
   context: RecommendationContext,
@@ -306,19 +319,19 @@ export function recommendModels(
       )!
     : lowest(pool, (candidate) => candidate.worstError + candidate.error / 1000)!;
 
-  // Fast means the best quality inside the CPU target. If every usable model
-  // misses that target, prefer the quickest usable model rather than a fast
-  // model whose transcript is not useful.
-  const onCpu = pool.filter(
-    (candidate): candidate is ScoredModel & { cpuWaitSeconds: number } =>
-      candidate.cpuWaitSeconds !== undefined,
+  // Fast means the best quality inside the Fast tier's target. If every
+  // usable model misses that target, prefer the quickest usable model rather
+  // than a fast model whose transcript is not useful.
+  const onFastTier = pool.filter(
+    (candidate): candidate is ScoredModel & { fastWaitSeconds: number } =>
+      candidate.fastWaitSeconds !== undefined,
   );
-  const withinCpuBudget = onCpu.filter(
-    (candidate) => candidate.cpuWaitSeconds <= method.fastCpuMaxWaitSeconds,
+  const withinFastBudget = onFastTier.filter(
+    (candidate) => candidate.fastWaitSeconds <= method.fastMaxWaitSeconds,
   );
   const fast = hasUsableModel
-    ? lowest(withinCpuBudget, byError) ??
-      lowest(onCpu, (candidate) => candidate.cpuWaitSeconds + candidate.error / 1000) ??
+    ? lowest(withinFastBudget, byError) ??
+      lowest(onFastTier, (candidate) => candidate.fastWaitSeconds + candidate.error / 1000) ??
       overall
     : overall;
 
@@ -350,8 +363,8 @@ export function recommendModels(
         error: candidate.error,
         waitSeconds: candidate.waitSeconds,
         withinFastWaitTarget:
-          candidate.cpuWaitSeconds !== undefined &&
-          candidate.cpuWaitSeconds <= method.fastCpuMaxWaitSeconds,
+          candidate.fastWaitSeconds !== undefined &&
+          candidate.fastWaitSeconds <= method.fastMaxWaitSeconds,
         worstLanguage: candidate.worstLanguage,
         worstError: candidate.worstError,
         overFloor: candidate.worstError >= method.maxLanguageErrorPercent,
