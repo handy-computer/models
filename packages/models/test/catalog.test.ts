@@ -72,6 +72,8 @@ test("curated models are transcription models with copy, the benchmarked quant, 
 test("the language detector is a published langid model", () => {
   assert.equal(LANGUAGE_DETECTION_MODEL.role, "langid");
   assert.ok(LANGUAGE_DETECTION_MODEL.languages.length > 100);
+  assert.equal(LANGUAGE_DETECTION_MODEL.quant, "F16");
+  assert.ok(LANGUAGE_DETECTION_MODEL.files.Q8_0, "earlier default stays published");
 });
 
 test("engine filtering keeps models whose minimum engine is not newer", () => {

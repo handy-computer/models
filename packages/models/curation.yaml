@@ -32,10 +32,12 @@ methodology:
   accurateMaxWaitSeconds: 10
 
 # Lets models without native detection offer Auto across the languages it
-# can identify. Recommendations depend on its language list.
+# can identify. Recommendations depend on its language list. `quant` is its
+# default download (it isn't benchmarked here, so it needn't match above).
 languageDetector:
   id: lang-id-voxlingua107-ecapa
   description: Shared spoken-language detector for multilingual transcription models
+  quant: F16
 
 # Curated models, keyed by Hugging Face repo name without "-gguf", with
 # their editorial description. Names are in `names` below.

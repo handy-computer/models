@@ -337,8 +337,11 @@ for (const { stem, blob, record } of records) {
     const pinned = pin.files[filename];
     files[fileQuant] = { filename: pinned.filename ?? filename, size: size_bytes, sha256: pinned.sha256 };
   }
-  const defaultQuant = quant in files ? quant : Object.keys(files)[0];
+  // Curated models default to the benchmarked quant; the detector may name its own.
+  const wanted = (detector.id === id && detector.quant) || quant;
+  const defaultQuant = wanted in files ? wanted : Object.keys(files)[0];
   if (curated[id] && defaultQuant !== quant) problems.push(`${id}: curated but has no ${quant} file`);
+  if (detector.id === id && defaultQuant !== wanted) problems.push(`${id}: language detector has no ${wanted} file`);
 
   const capabilities = record.capabilities ?? {};
   models.push({

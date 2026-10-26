@@ -70,7 +70,8 @@ The hand-edited editorial configuration. It holds:
   version the apps ship; benchmarks can change with engine behaviour.
 - `benchmarks`: which quant, dataset and machines the picks are judged on.
 - `methodology`: the recommendation thresholds.
-- `languageDetector`: the shared spoken-language detector.
+- `languageDetector`: the shared spoken-language detector, and its default
+  `quant` (F16; every other quant stays in `files`).
 - `models`: the curated models, by Hugging Face repo name without `-gguf`,
   each with a `description`. Listing a model is what makes it curated;
   removing it makes it Published only.
