@@ -7,7 +7,7 @@
 
 # The transcribe.cpp release the facts and benchmarks come from. Use the
 # engine version the apps ship: benchmarks can change with engine behaviour.
-transcribeCpp: v0.4.0
+transcribeCpp: v0.4.1
 
 # Where recommendation numbers come from. Accuracy and the default download
 # are always the same quant, so a grade describes the file users get.
