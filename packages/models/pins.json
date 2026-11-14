@@ -669,104 +669,122 @@
     }
   },
   "moonshine-base-ar": {
-    "revision": "1ae85af52b16eac8bcebda0287e6195ed1956e86",
+    "revision": "05f839ce58ee34eef666fb9725e2ef83dd81bb09",
+    "previous": [
+      "1ae85af52b16eac8bcebda0287e6195ed1956e86"
+    ],
     "files": {
       "moonshine-base-ar-F32.gguf": {
-        "size": 247657088,
-        "sha256": "5c0f54279e41c195c5b5c288cdee94b0960bdc8be518dfd22aac11850254fb2b"
+        "size": 247657152,
+        "sha256": "6027467ca69de2e318f3fef3b94e53b1fe7a23279f5c2c55d674f43fed7849c6"
       },
       "moonshine-base-ar-F16.gguf": {
-        "size": 131789440,
-        "sha256": "9a70242ad42fb130a417c11127f5e7ad227c03b0c4a287fa60757efa3cccd714"
+        "size": 131789504,
+        "sha256": "97195a5830c2a6c8719476d5c1109c2328cd7c7c7bc86938f18ff5bfc933c44f"
       },
       "moonshine-base-ar-Q8_0.gguf": {
-        "size": 77476480,
-        "sha256": "1a5b34653dfff0917d5bc7de1aeafca674162a5efa674472358d1b7f1644cf73"
+        "size": 77476544,
+        "sha256": "0724aee48dc1ec95c6faf8249ebd5f4bf71dd709ec3ca33ccf6d9d466119da69"
       }
     }
   },
   "moonshine-base-ja": {
-    "revision": "aac5cfff17ae28b6f17ae790a3e309ae0ca5911c",
+    "revision": "1674f5f93b7655000951d25d496dcfac947b3968",
+    "previous": [
+      "aac5cfff17ae28b6f17ae790a3e309ae0ca5911c"
+    ],
     "files": {
       "moonshine-base-ja-F32.gguf": {
-        "size": 247657088,
-        "sha256": "649f65dbc795d9fd4cf23f2123a09cdcdffba7e071891caa39e60d6a84c19082"
+        "size": 247657152,
+        "sha256": "81676e6fbfaeead6372510b816e67a2fc6c52c165a1a83b8722925e12d157fec"
       },
       "moonshine-base-ja-F16.gguf": {
-        "size": 131789440,
-        "sha256": "a3fb02bb2f6d6b5082818fb60cbc816a20e3865502adca2e1fd94068b29e5d2b"
+        "size": 131789504,
+        "sha256": "02501243bf4ffed4bdbe9d86cf19e693c6893e515d3a18614cdaba0b0d7a7ae2"
       },
       "moonshine-base-ja-Q8_0.gguf": {
-        "size": 77476480,
-        "sha256": "8ee6e9d7c9df69a3ea654af77659f1c0c08bf90998c2e2a269826096ffafc4f0"
+        "size": 77476544,
+        "sha256": "097c88175904208e0f22311212b9d95dee70cd84882a2a4fc04fa3f5a1165654"
       }
     }
   },
   "moonshine-base-ko": {
-    "revision": "03813c71abe85b40cd0671d3cfa420e831d7e333",
+    "revision": "f18fb612b8ec33fc50a7afdb69a1fed9cb3ef46d",
+    "previous": [
+      "03813c71abe85b40cd0671d3cfa420e831d7e333"
+    ],
     "files": {
       "moonshine-base-ko-F32.gguf": {
-        "size": 247657088,
-        "sha256": "7b4a358a883537ce5584f867c683f1850027ddb842c7cdb526b6b4704402eeb1"
+        "size": 247657152,
+        "sha256": "a854be12522c7f01e87a4a11220e89ee5f4bef2b5c2cdbcaa464cf2622a98d26"
       },
       "moonshine-base-ko-F16.gguf": {
-        "size": 131789440,
-        "sha256": "79b29fd6803723b7884824710aebef743f068e2db0fc3ad0488bc16b05b69c2c"
+        "size": 131789504,
+        "sha256": "c1f7689b361dbbaa1081f0c25fac4d4c3e51352c17b20f4ac77762f5e52e9aae"
       },
       "moonshine-base-ko-Q8_0.gguf": {
-        "size": 77476480,
-        "sha256": "b430672cfdde98b894bd98adf1a8b3470308fea39ad1e6bb0f54d8fc9e114471"
+        "size": 77476544,
+        "sha256": "f500024f8362c84baab53067d5b2946afbeec9d170ffc348d75690ca051a799f"
       }
     }
   },
   "moonshine-base-uk": {
-    "revision": "d6ec586909c5209c0c17243dc4f5e55164f85dfb",
+    "revision": "ab049e2593f5752db27e12d5d560a60082f1be8f",
+    "previous": [
+      "d6ec586909c5209c0c17243dc4f5e55164f85dfb"
+    ],
     "files": {
       "moonshine-base-uk-F32.gguf": {
-        "size": 247657120,
-        "sha256": "2d230e76f32e4e9e818b53c0abe70cfb65c15e1ee28170bcc324bce0470e7c4b"
+        "size": 247657152,
+        "sha256": "a4caa4372bc752f451ed6639b5c9fa95f9643d70ee8fb7c1487e668dcbf444fd"
       },
       "moonshine-base-uk-F16.gguf": {
-        "size": 131789472,
-        "sha256": "e603b1e70da31060b0094f34732996156ec8e89cb1068e2f2cf64a91c3ea6cff"
+        "size": 131789504,
+        "sha256": "b1a2b81fa2cc0f867944f6c781df29af53ed5e88c9bb56668653b5ca50b1096e"
       },
       "moonshine-base-uk-Q8_0.gguf": {
-        "size": 77476512,
-        "sha256": "6dcac8c3905706e8c8416f531a479eccaa38cdaf1eae439f776fda4d4faa88d3"
+        "size": 77476544,
+        "sha256": "186ca7089ee0606cb9952c73a130f7ba54895fd3053a34278aa0082ecb3c50ec"
       }
     }
   },
   "moonshine-base-vi": {
-    "revision": "76ccec93f5854ae16d2dab72d5b762fe10c0df81",
+    "revision": "9350464011cc379a91bfdcff6b63c150681320ec",
+    "previous": [
+      "76ccec93f5854ae16d2dab72d5b762fe10c0df81"
+    ],
     "files": {
       "moonshine-base-vi-F32.gguf": {
-        "size": 247657120,
-        "sha256": "b04a66041ac50f0274668e17ec62a9ec93bdae23af39b98cc0923fbca2ff2c72"
+        "size": 247657152,
+        "sha256": "163d3e23bb0ca7f4fdfb270972c808fbfbdcc6a3df46b39a1145d8fec36aeb2e"
       },
       "moonshine-base-vi-F16.gguf": {
-        "size": 131789472,
-        "sha256": "1406f7c80cad755f93d4915d21fbcf5e65f19d4c93e8a3966f970a6a4d6f7068"
+        "size": 131789504,
+        "sha256": "810042d0776caea4920c33cc883deea7609bc4eef6f29cd4e955fe94632ffad6"
       },
       "moonshine-base-vi-Q8_0.gguf": {
-        "size": 77476512,
-        "sha256": "d382ec7ac6aa821d25b921ab982bf1bf29da591cad73372b65209c6a74decb36"
+        "size": 77476544,
+        "sha256": "5197e3cbb7f6cac5a854b9d2ad23a4ead9b3f63cb79c131108424200316c4732"
       }
     }
   },
   "moonshine-base-zh": {
-    "revision": "64385c681d79767be73ce8591b4609854ac750c9",
+    "revision": "0af85e91f10c82328194ee8fd0062c88b7045a30",
+    "previous": [
+      "64385c681d79767be73ce8591b4609854ac750c9"
+    ],
     "files": {
       "moonshine-base-zh-F32.gguf": {
-        "size": 247657088,
-        "sha256": "1a54db0bec02f81730e6378b185f807cdf9065a477c7171f01914ca917408673"
+        "size": 247657152,
+        "sha256": "fd4efadcf4f299fc10e47cb6a969f8aefb85c607175eeef7685b5898777b77ed"
       },
       "moonshine-base-zh-F16.gguf": {
-        "size": 131789440,
-        "sha256": "bead0492ab45cee75411d5e59e95a5e796b86ab6cde3bfee4613c02cba9f2e35"
+        "size": 131789504,
+        "sha256": "506f0d7e880ecae0b08080863f457163353cb0cbf862801133be43ce223bdaeb"
       },
       "moonshine-base-zh-Q8_0.gguf": {
-        "size": 77476480,
-        "sha256": "1bae1d753b29b0c34038585b576d28e4f262ed10c6c7217e023fa5d624dc15ad"
+        "size": 77476544,
+        "sha256": "f2d0e167827aa2b17219902c4f524863913be25c33beffb42b416352d3194771"
       }
     }
   },
@@ -839,104 +857,122 @@
     }
   },
   "moonshine-tiny-ar": {
-    "revision": "2360cb6893cb523da51875eaffc8050d2ca7b56d",
+    "revision": "797a90bdb410bb11bee3fc44f0e13b79836ca93c",
+    "previous": [
+      "2360cb6893cb523da51875eaffc8050d2ca7b56d"
+    ],
     "files": {
       "moonshine-tiny-ar-F32.gguf": {
-        "size": 109969088,
-        "sha256": "39cacdf5c240930cca65c06eb176eb49c25aa59dd2a425cc8c04a0a14bc9cc64"
+        "size": 109969120,
+        "sha256": "61f0bab78e3fa9d1605cbd5f63c9c5a05245e1dc62638aa6f005945d2b12394d"
       },
       "moonshine-tiny-ar-F16.gguf": {
-        "size": 59244224,
-        "sha256": "209dd912f51f04a67977d0d93ea7363b0190786c3d7e1a2fbbbd0e94c4001aad"
+        "size": 59244256,
+        "sha256": "2786b380393ae11d52e17dca12b6792e223b61b8a8eca49cc73bd9f4e54a5c10"
       },
       "moonshine-tiny-ar-Q8_0.gguf": {
-        "size": 35466944,
-        "sha256": "e0bfa7c3aad2fe7acce022566daa1bb6140b6b263ba79655241acec7f7e0000b"
+        "size": 35466976,
+        "sha256": "6fefb5fd1a1bad78f1f2e946996313d5e343c902ddb5c4d42e6e42d2599ca953"
       }
     }
   },
   "moonshine-tiny-ja": {
-    "revision": "627aae63193d6c47cbdf316346119dcdc65d9b0d",
+    "revision": "9bddc8011cdade1b88bfdb73921d061972ea578c",
+    "previous": [
+      "627aae63193d6c47cbdf316346119dcdc65d9b0d"
+    ],
     "files": {
       "moonshine-tiny-ja-F32.gguf": {
-        "size": 109969088,
-        "sha256": "4c87575b72de88ba148ffd0fa87c8cde20e0761974a6fed458822131a71e239b"
+        "size": 109969120,
+        "sha256": "a5565b829ac6ad75ee0dddfc4a2daa02060997eb51c5e9802d4a9362f822536a"
       },
       "moonshine-tiny-ja-F16.gguf": {
-        "size": 59244224,
-        "sha256": "5a8b7960b119d1d2a947509ca9b4be6e71f6759973d5c200283335bfddd8cb43"
+        "size": 59244256,
+        "sha256": "e092a8c336546e8a45b0ce0ab8eaf753430dd94408cca77dbdf17d1bb247ff23"
       },
       "moonshine-tiny-ja-Q8_0.gguf": {
-        "size": 35466944,
-        "sha256": "b47da12b2238cd176d9deebf31d49803c9eb4e99de5fd3abf672b4c0e2773c26"
+        "size": 35466976,
+        "sha256": "0983221896a7271aa48341cb04d7f00c91f561493c423d3086189ed0eeec679a"
       }
     }
   },
   "moonshine-tiny-ko": {
-    "revision": "b858a303948b69c8b2442f700e936a07ba5f64da",
+    "revision": "d090db2d9467b0c4cb91b9112b2da2d337a23ecc",
+    "previous": [
+      "b858a303948b69c8b2442f700e936a07ba5f64da"
+    ],
     "files": {
       "moonshine-tiny-ko-F32.gguf": {
-        "size": 109969088,
-        "sha256": "1a13e4a0b7a97c9974ca1f88b275f8e43bf6453225cf549712efe4ec7aa1ad40"
+        "size": 109969120,
+        "sha256": "cbf9cfd94d489fe8164d7a60d1b964d7a9b3168f7a257924b0f038354f391ea1"
       },
       "moonshine-tiny-ko-F16.gguf": {
-        "size": 59244224,
-        "sha256": "4228c8e92d6308166f96708de35af09318d624c3c1495e80eb8f6180790edd5d"
+        "size": 59244256,
+        "sha256": "b3713566e68e60baa926982b8c5571fd453a43c209f49ca508b5bfcd67cd8af9"
       },
       "moonshine-tiny-ko-Q8_0.gguf": {
-        "size": 35466944,
-        "sha256": "3ffe3340ceed10843789e2f7bf580097213c97a3537cae7031dbfe2a409b36b7"
+        "size": 35466976,
+        "sha256": "8f237a01aca8c89b85c88b3483f31a21d26e997477cb2bd410daadaede05d7a9"
       }
     }
   },
   "moonshine-tiny-uk": {
-    "revision": "b4c991eb4223caa4de770843185476b0c86056b4",
+    "revision": "da669450485c6ba60a2e33cf7d0d17e85c2dd523",
+    "previous": [
+      "b4c991eb4223caa4de770843185476b0c86056b4"
+    ],
     "files": {
       "moonshine-tiny-uk-F32.gguf": {
-        "size": 109969088,
-        "sha256": "7c2bf9f4562f9c094f12fe73d490d03dc2971bc7f31bf0b2e5b3b10b92330610"
+        "size": 109969120,
+        "sha256": "2fdd9bc257cd20d06d369061eb76b780adc9e59c6f3dbceb841e352af1d4159f"
       },
       "moonshine-tiny-uk-F16.gguf": {
-        "size": 59244224,
-        "sha256": "08521642651a398a6c7afac28395ce5cc6938d30f9563bde4c13fe898438ff69"
+        "size": 59244256,
+        "sha256": "de14b3ac235b4f57a8c4dde33fff011b8bdfcbff443e84be9999a7d755255177"
       },
       "moonshine-tiny-uk-Q8_0.gguf": {
-        "size": 35466944,
-        "sha256": "61c372f6d99cce6c7b7c45626a51a6c935217368e715d9c4e036ce85f4496338"
+        "size": 35466976,
+        "sha256": "748eeee3a5892022e47c9fb30fd5d4089e335851fbd5728c2991bc6f3836353f"
       }
     }
   },
   "moonshine-tiny-vi": {
-    "revision": "d97be0111a74a9058689beacc05b38969d2b68aa",
+    "revision": "4944164bf4fd69452ece61247f4a673de51e5a44",
+    "previous": [
+      "d97be0111a74a9058689beacc05b38969d2b68aa"
+    ],
     "files": {
       "moonshine-tiny-vi-F32.gguf": {
-        "size": 109969088,
-        "sha256": "7423501769416a83eb4763ea85be58e4c20ca629d9181f522a2a2da398b9c194"
+        "size": 109969120,
+        "sha256": "a9255530bf5fca2057990bfa9ebebe1d1dcda45825917382c901b766d5b81281"
       },
       "moonshine-tiny-vi-F16.gguf": {
-        "size": 59244224,
-        "sha256": "94464f474fc4a574951e335a731fabaf97a2e517a96bf4fcfd82791a67fa40ce"
+        "size": 59244256,
+        "sha256": "c3d2c789cac625cd8591ffb5fabe26b522b3d438c3a8c01b1697b1f3d344381f"
       },
       "moonshine-tiny-vi-Q8_0.gguf": {
-        "size": 35466944,
-        "sha256": "a42a80ef2e3636104aa2aff87cdde3e251e319e7d0d1acb3fb594cc601d8b95f"
+        "size": 35466976,
+        "sha256": "40729a03b6dc5ceaf51ddab399fc8fc74c1b08c655ea610f4a2f49b0e407bc5d"
       }
     }
   },
   "moonshine-tiny-zh": {
-    "revision": "2aca379ba0dc978d878b84b76231d5ba5550e738",
+    "revision": "6dbc7db4b3bc8aec307df4302f26f2fc7b30daee",
+    "previous": [
+      "2aca379ba0dc978d878b84b76231d5ba5550e738"
+    ],
     "files": {
       "moonshine-tiny-zh-F32.gguf": {
-        "size": 109969088,
-        "sha256": "43cb182cedd45d7117846bb540bb2b33ee200ec35095b9f7a697ea3ad3c9602f"
+        "size": 109969120,
+        "sha256": "28053ddcce6b79bffa6fe85462aae71b30a8c87833d83c226907b78da8facec8"
       },
       "moonshine-tiny-zh-F16.gguf": {
-        "size": 59244224,
-        "sha256": "33c59e565336f1b8d6da86cb6d6321e8797bb65e9bf11947258e7340d3dcd968"
+        "size": 59244256,
+        "sha256": "5fc54e2e7a8301fd2f2ef1f9bcff56e2f99c5ec22778479e249a227b45cc6d18"
       },
       "moonshine-tiny-zh-Q8_0.gguf": {
-        "size": 35466944,
-        "sha256": "95387abe90625410f8e2bcec43faaaadc0d92ef1e721117eb8a69cd31a7ef692"
+        "size": 35466976,
+        "sha256": "3dbe630122d3c90a332da35942c09fc4ef1b320e3e6539c0f10faa6ae1a22121"
       }
     }
   },
@@ -981,33 +1017,27 @@
       "0314bc0d2f4be9a0d79fa5eeb36ad1f3962cfcbb"
     ],
     "files": {
-      "bundle/multitalker-parakeet-streaming-0.6b-v1-F32.gguf": {
-        "filename": "multitalker-parakeet-streaming-0.6b-v1-F32.gguf",
+      "multitalker-parakeet-streaming-0.6b-v1-F32.gguf": {
         "size": 2960100448,
         "sha256": "1ae09d63777dc4ae061f1f92b8aa0f7336f51bd995860946cc1f120b7e010f16"
       },
-      "bundle/multitalker-parakeet-streaming-0.6b-v1-F16.gguf": {
-        "filename": "multitalker-parakeet-streaming-0.6b-v1-F16.gguf",
+      "multitalker-parakeet-streaming-0.6b-v1-F16.gguf": {
         "size": 1482674272,
         "sha256": "18116241c595891bccf44cd0207cd749e9ba9e6025ee73ab59606633ec730304"
       },
-      "bundle/multitalker-parakeet-streaming-0.6b-v1-Q8_0.gguf": {
-        "filename": "multitalker-parakeet-streaming-0.6b-v1-Q8_0.gguf",
+      "multitalker-parakeet-streaming-0.6b-v1-Q8_0.gguf": {
         "size": 873443456,
         "sha256": "cf83cedc6777d2528a4d2a8a4bf476174ef7e5c65b86bc6c955f4cc9f5951ac5"
       },
-      "bundle/multitalker-parakeet-streaming-0.6b-v1-Q6_K.gguf": {
-        "filename": "multitalker-parakeet-streaming-0.6b-v1-Q6_K.gguf",
+      "multitalker-parakeet-streaming-0.6b-v1-Q6_K.gguf": {
         "size": 743197824,
         "sha256": "d8db95ba257e370d910f42e8197dfc65fb5b879e09e4b13aefaac06af3555fa1"
       },
-      "bundle/multitalker-parakeet-streaming-0.6b-v1-Q5_K_M.gguf": {
-        "filename": "multitalker-parakeet-streaming-0.6b-v1-Q5_K_M.gguf",
+      "multitalker-parakeet-streaming-0.6b-v1-Q5_K_M.gguf": {
         "size": 681209984,
         "sha256": "38c98bc0715ee95b4271952630661050a8c3c37f64b8b178c62b8b699668cbdb"
       },
-      "bundle/multitalker-parakeet-streaming-0.6b-v1-Q4_K_M.gguf": {
-        "filename": "multitalker-parakeet-streaming-0.6b-v1-Q4_K_M.gguf",
+      "multitalker-parakeet-streaming-0.6b-v1-Q4_K_M.gguf": {
         "size": 617132160,
         "sha256": "d24307ac22e9e691c146a7e2339891638a44a8492a765e4b6c11cff8960cd998"
       }
@@ -1448,6 +1478,9 @@
       }
     }
   },
+  "phonon-2": {
+    "private": true
+  },
   "Qwen3-ASR-0.6B": {
     "revision": "e4e16599b900eb0cb36e524514756bb92eb092b7",
     "files": {
@@ -1773,27 +1806,30 @@
     }
   },
   "whisper-large-v3-turbo": {
-    "revision": "5eaf945c7978e564bae5b28a5b1639dd93c2bfb1",
+    "revision": "18ada752005f5fddef499256f9a458d0b37a203a",
+    "previous": [
+      "5eaf945c7978e564bae5b28a5b1639dd93c2bfb1"
+    ],
     "files": {
       "whisper-large-v3-turbo-F16.gguf": {
-        "size": 1625935520,
-        "sha256": "e1d0144e9afc9f479d9e51fc92c7dea9dc36059655eeb3819f16ad2de779046a"
+        "size": 1625935488,
+        "sha256": "c8506ddfa3d4eb9279170d722a75422db00dbdbd7618531bbb81926e0598eb8f"
       },
       "whisper-large-v3-turbo-Q8_0.gguf": {
-        "size": 886381760,
-        "sha256": "b2e30cc286bc9f3aba4db9099fc7403543497c05ce7100d0d83091ddfd25a183"
+        "size": 886381728,
+        "sha256": "257aa7ec9121c22c167d5e2c49e3e76b4ba0e6e27ebc13074eba0a80f8190220"
       },
       "whisper-large-v3-turbo-Q6_K.gguf": {
-        "size": 692536928,
-        "sha256": "3881dc17bf345f7ce4a3c48327074951e1550c8a1e89fa58d554d9f26a1b6274"
+        "size": 692536896,
+        "sha256": "b8b4d57e1a6fc49bcd7843faadf224c27cb27707e13db7e6dbfbfffe39878103"
       },
       "whisper-large-v3-turbo-Q5_K_M.gguf": {
-        "size": 619628128,
-        "sha256": "977b5db4e004349dffd1ab9caa10ba5aaba3fc3edd3ba72cadb84328a3203e36"
+        "size": 619628096,
+        "sha256": "06fc9923c09fb3ae878ea12c34d1be3ed18fad039ab14b4b045c7b6c40af56b2"
       },
       "whisper-large-v3-turbo-Q4_K_M.gguf": {
-        "size": 536069728,
-        "sha256": "ecfe9b6beb4ab18fef49187cc968cc74b5168b94629c8830e2ca6b794c6e25ed"
+        "size": 536069696,
+        "sha256": "c6e172d0074f0fa9440b88247854b50643cd4bb58b8515c797bbed16d858c7df"
       }
     }
   },
